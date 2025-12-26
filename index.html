@@ -1558,9 +1558,17 @@
            ========================================== */
         .favorites-list {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            /* Fix for content overflow */
             gap: 0.5rem;
-            /* Reduced gap */
+        }
+
+        @media (max-width: 500px) {
+
+            /* Already covered by the rule above, but keeping for safety */
+            .favorites-list {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         /* Ensure items stretch */
@@ -1568,8 +1576,33 @@
             height: 100%;
             display: flex;
             align-items: center;
-            padding: 0.75rem;
-            /* Compact padding */
+            padding: 0.5rem;
+            /* Reduced padding for mobile */
+            overflow: hidden;
+            /* Contain content */
+            min-width: 0;
+            /* Enable flex shrinking */
+        }
+
+        .favorite-content {
+            flex: 1;
+            min-width: 0;
+            /* Crucial for text truncation in flex child */
+            margin: 0 0.5rem;
+        }
+
+        .favorite-title {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+
+        .favorite-meta {
+            font-size: 0.75rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* ==========================================

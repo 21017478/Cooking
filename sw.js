@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vacuum-guide-v2';
+const CACHE_NAME = 'vacuum-guide-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
