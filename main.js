@@ -13,9 +13,12 @@ document.addEventListener('DOMContentLoaded', function () {
 const AppState = {
     favorites: [],
     notes: {},
+    customRecipes: [],
     theme: 'dark',
     activeSection: 'favorites',
-    searchQuery: ''
+    searchQuery: '',
+    editingRecipeId: null,
+    deletingRecipeId: null
 };
 
 // ==========================================
@@ -25,6 +28,7 @@ function initializeApp() {
     loadFavorites();
     loadNotes();
     loadTheme();
+    loadCustomRecipes();
     renderRecipeCards();
     renderFavorites();
     setupNavigation();
@@ -34,6 +38,7 @@ function initializeApp() {
     setupRecipeModal();
     setupFavoriteReordering();
     setupThemeToggle();
+    setupRecipeForm();
 }
 
 // ==========================================
@@ -211,13 +216,19 @@ function setupFavoriteReordering() {
 // ==========================================
 function renderRecipeCards() {
     const grid = document.getElementById('recipe-grid');
-    if (!grid || typeof recipes === 'undefined') return;
+    if (!grid) return;
 
     grid.innerHTML = '';
 
-    recipes.forEach(recipe => {
+    // Combine built-in recipes with custom recipes
+    const allRecipes = [
+        ...(typeof recipes !== 'undefined' ? recipes : []),
+        ...AppState.customRecipes
+    ];
+
+    allRecipes.forEach(recipe => {
         const card = document.createElement('div');
-        card.className = 'recipe-card show';
+        card.className = 'recipe-card show' + (recipe.isCustom ? ' custom' : '');
         card.dataset.category = recipe.category;
         card.dataset.recipeId = recipe.id;
         card.dataset.name = recipe.name;
@@ -225,6 +236,7 @@ function renderRecipeCards() {
         const isFav = isFavorite(recipe.id);
 
         card.innerHTML = `
+            ${recipe.isCustom ? '<span class="recipe-custom-badge">Custom</span>' : ''}
             <div class="recipe-card-header">
                 <span class="recipe-category-badge">${recipe.category}</span>
                 <button class="recipe-favorite-btn ${isFav ? 'active' : ''}" 
@@ -244,12 +256,25 @@ function renderRecipeCards() {
                 <span>⏱️ ${recipe.prepTime || 'Varies'}</span>
                 <span>❄️ ${recipe.totalTime || 'See recipe'}</span>
             </div>
+            ${recipe.isCustom ? `
+                <div class="recipe-card-actions">
+                    <button class="recipe-card-action edit" data-id="${recipe.id}" title="Edit">✏️</button>
+                    <button class="recipe-card-action delete" data-id="${recipe.id}" data-name="${recipe.name}" title="Delete">🗑️</button>
+                </div>
+            ` : ''}
         `;
 
-        // Click to open modal
+        // Click to open modal (or edit for custom)
         card.addEventListener('click', (e) => {
             if (e.target.classList.contains('recipe-favorite-btn')) return;
-            showRecipeDetail(recipe.name);
+            if (e.target.classList.contains('recipe-card-action')) return;
+
+            if (recipe.isCustom) {
+                // Show custom recipe in a simpler view (or could open edit form)
+                showCustomRecipeDetail(recipe);
+            } else {
+                showRecipeDetail(recipe.name);
+            }
         });
 
         // Favorite button
@@ -270,8 +295,67 @@ function renderRecipeCards() {
             }
         });
 
+        // Edit button (custom recipes only)
+        const editBtn = card.querySelector('.recipe-card-action.edit');
+        editBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openRecipeForm(recipe.id);
+        });
+
+        // Delete button (custom recipes only)
+        const deleteBtn = card.querySelector('.recipe-card-action.delete');
+        deleteBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openDeleteModal(recipe.id, recipe.name);
+        });
+
         grid.appendChild(card);
     });
+
+    // Update note badges
+    updateNoteBadges();
+}
+
+// Show custom recipe detail
+function showCustomRecipeDetail(recipe) {
+    const modal = document.getElementById('recipeModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalTabs = document.getElementById('modalTabs');
+    const modalBody = document.getElementById('modalBody');
+
+    modalTitle.textContent = recipe.name;
+    modalTabs.innerHTML = '';
+
+    let content = '';
+
+    if (recipe.description) {
+        content += `<p>${recipe.description}</p>`;
+    }
+
+    if (recipe.ingredients && recipe.ingredients.length) {
+        content += '<h3>Ingredients</h3><ul>';
+        recipe.ingredients.forEach(i => {
+            content += `<li>${i}</li>`;
+        });
+        content += '</ul>';
+    }
+
+    if (recipe.steps && recipe.steps.length) {
+        content += '<h3>Instructions</h3><ol>';
+        recipe.steps.forEach(s => {
+            content += `<li>${s}</li>`;
+        });
+        content += '</ol>';
+    }
+
+    if (recipe.vacuumTips) {
+        content += `<h3>Vacuum Sealing Tips</h3><p>${recipe.vacuumTips}</p>`;
+    }
+
+    modalBody.innerHTML = content || '<p>No details available.</p>';
+
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
 function updateFavoriteButtons() {
@@ -646,3 +730,276 @@ function updateNoteBadges() {
     });
 }
 
+// ==========================================
+// CUSTOM RECIPES SYSTEM
+// ==========================================
+function loadCustomRecipes() {
+    try {
+        const stored = localStorage.getItem('vacuprep_custom_recipes');
+        AppState.customRecipes = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        AppState.customRecipes = [];
+    }
+}
+
+function saveCustomRecipes() {
+    localStorage.setItem('vacuprep_custom_recipes', JSON.stringify(AppState.customRecipes));
+}
+
+function getCategoryEmoji(category) {
+    const emojis = {
+        beef: '🥩', chicken: '🍗', lamb: '🍖', pork: '🥓',
+        seafood: '🦐', vegetables: '🥦', vegetarian: '🥗',
+        breakfast: '🍳', dessert: '🍰', other: '🍽️'
+    };
+    return emojis[category] || '🍽️';
+}
+
+function createCustomRecipe(data) {
+    const recipe = {
+        id: 'custom-' + Date.now(),
+        name: data.name,
+        category: data.category,
+        image: getCategoryEmoji(data.category),
+        description: data.description || '',
+        prepTime: data.prepTime || 'N/A',
+        totalTime: data.cookTime || 'N/A',
+        isCustom: true,
+        ingredients: data.ingredients.split('\n').filter(i => i.trim()),
+        steps: data.steps.split('\n').filter(s => s.trim()),
+        vacuumTips: data.vacuumTips || '',
+        createdAt: new Date().toISOString()
+    };
+
+    AppState.customRecipes.push(recipe);
+    saveCustomRecipes();
+    renderRecipeCards();
+    return recipe;
+}
+
+function updateCustomRecipe(id, data) {
+    const index = AppState.customRecipes.findIndex(r => r.id === id);
+    if (index === -1) return false;
+
+    AppState.customRecipes[index] = {
+        ...AppState.customRecipes[index],
+        name: data.name,
+        category: data.category,
+        image: getCategoryEmoji(data.category),
+        description: data.description || '',
+        prepTime: data.prepTime || 'N/A',
+        totalTime: data.cookTime || 'N/A',
+        ingredients: data.ingredients.split('\n').filter(i => i.trim()),
+        steps: data.steps.split('\n').filter(s => s.trim()),
+        vacuumTips: data.vacuumTips || '',
+        updatedAt: new Date().toISOString()
+    };
+
+    saveCustomRecipes();
+    renderRecipeCards();
+    return true;
+}
+
+function deleteCustomRecipe(id) {
+    AppState.customRecipes = AppState.customRecipes.filter(r => r.id !== id);
+    saveCustomRecipes();
+    renderRecipeCards();
+}
+
+function getCustomRecipeById(id) {
+    return AppState.customRecipes.find(r => r.id === id);
+}
+
+// ==========================================
+// RECIPE FORM HANDLING
+// ==========================================
+function setupRecipeForm() {
+    const fab = document.getElementById('addRecipeFab');
+    const formModal = document.getElementById('recipeFormModal');
+    const formClose = document.getElementById('formModalClose');
+    const cancelBtn = document.getElementById('cancelRecipeForm');
+    const form = document.getElementById('recipeForm');
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    const cancelDelete = document.getElementById('cancelDelete');
+    const confirmDelete = document.getElementById('confirmDelete');
+
+    if (!fab || !formModal || !form) return;
+
+    // Open form for new recipe
+    fab.addEventListener('click', () => {
+        openRecipeForm();
+    });
+
+    // Close form
+    formClose?.addEventListener('click', closeRecipeForm);
+    cancelBtn?.addEventListener('click', closeRecipeForm);
+    formModal.addEventListener('click', (e) => {
+        if (e.target === formModal) closeRecipeForm();
+    });
+
+    // Form submit
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById('recipeName').value.trim(),
+            category: document.getElementById('recipeCategory').value,
+            prepTime: document.getElementById('recipePrepTime').value.trim(),
+            cookTime: document.getElementById('recipeCookTime').value.trim(),
+            description: document.getElementById('recipeDescription').value.trim(),
+            ingredients: document.getElementById('recipeIngredients').value.trim(),
+            steps: document.getElementById('recipeSteps').value.trim(),
+            vacuumTips: document.getElementById('recipeVacuumTips').value.trim()
+        };
+
+        const editId = document.getElementById('recipeEditId').value;
+
+        if (editId) {
+            updateCustomRecipe(editId, data);
+        } else {
+            createCustomRecipe(data);
+        }
+
+        closeRecipeForm();
+    });
+
+    // Delete confirmation
+    cancelDelete?.addEventListener('click', closeDeleteModal);
+    deleteModal?.addEventListener('click', (e) => {
+        if (e.target === deleteModal) closeDeleteModal();
+    });
+
+    confirmDelete?.addEventListener('click', () => {
+        if (AppState.deletingRecipeId) {
+            deleteCustomRecipe(AppState.deletingRecipeId);
+            closeDeleteModal();
+        }
+    });
+}
+
+function openRecipeForm(recipeId = null) {
+    const formModal = document.getElementById('recipeFormModal');
+    const title = document.getElementById('formModalTitle');
+    const form = document.getElementById('recipeForm');
+
+    form.reset();
+    document.getElementById('recipeEditId').value = '';
+
+    if (recipeId) {
+        const recipe = getCustomRecipeById(recipeId);
+        if (recipe) {
+            title.textContent = 'Edit Recipe';
+            document.getElementById('recipeEditId').value = recipeId;
+            document.getElementById('recipeName').value = recipe.name;
+            document.getElementById('recipeCategory').value = recipe.category;
+            document.getElementById('recipePrepTime').value = recipe.prepTime || '';
+            document.getElementById('recipeCookTime').value = recipe.totalTime || '';
+            document.getElementById('recipeDescription').value = recipe.description || '';
+            document.getElementById('recipeIngredients').value = (recipe.ingredients || []).join('\n');
+            document.getElementById('recipeSteps').value = (recipe.steps || []).join('\n');
+            document.getElementById('recipeVacuumTips').value = recipe.vacuumTips || '';
+        }
+    } else {
+        title.textContent = 'Add Recipe';
+    }
+
+    AppState.editingRecipeId = recipeId;
+    formModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeRecipeForm() {
+    const formModal = document.getElementById('recipeFormModal');
+    formModal.classList.remove('active');
+    document.body.style.overflow = '';
+    AppState.editingRecipeId = null;
+}
+
+function openDeleteModal(recipeId, recipeName) {
+    const modal = document.getElementById('deleteConfirmModal');
+    const nameSpan = document.getElementById('deleteRecipeName');
+
+    AppState.deletingRecipeId = recipeId;
+    nameSpan.textContent = recipeName;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteConfirmModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    AppState.deletingRecipeId = null;
+}
+
+// ==========================================
+// EXPORT / IMPORT
+// ==========================================
+function exportCustomRecipes() {
+    const data = JSON.stringify(AppState.customRecipes, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'vacuprep-custom-recipes.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function parseRecipeText(text) {
+    // Smart parser for pasted recipe text
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    if (lines.length === 0) return null;
+
+    const recipe = {
+        name: '',
+        category: 'other',
+        prepTime: '',
+        cookTime: '',
+        description: '',
+        ingredients: [],
+        steps: []
+    };
+
+    let section = 'name';
+
+    for (const line of lines) {
+        const lower = line.toLowerCase();
+
+        // Detect section headers
+        if (lower.includes('ingredient')) {
+            section = 'ingredients';
+            continue;
+        }
+        if (lower.includes('step') || lower.includes('instruction') || lower.includes('method')) {
+            section = 'steps';
+            continue;
+        }
+        if (lower.includes('prep') && lower.includes(':')) {
+            recipe.prepTime = line.split(':')[1]?.trim() || '';
+            continue;
+        }
+        if (lower.includes('cook') && lower.includes(':')) {
+            recipe.cookTime = line.split(':')[1]?.trim() || '';
+            continue;
+        }
+
+        // First line is usually the name
+        if (!recipe.name && section === 'name') {
+            recipe.name = line;
+            section = 'description';
+            continue;
+        }
+
+        // Add to appropriate section
+        if (section === 'ingredients') {
+            recipe.ingredients.push(line.replace(/^[-•*]\s*/, ''));
+        } else if (section === 'steps') {
+            recipe.steps.push(line.replace(/^\d+[.)]\s*/, ''));
+        } else if (section === 'description' && !recipe.description) {
+            recipe.description = line;
+        }
+    }
+
+    return recipe;
+}
