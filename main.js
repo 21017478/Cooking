@@ -119,16 +119,90 @@ function reorderFavorites(fromIndex, toIndex) {
     renderFavorites();
 }
 
-function resizeWidget(index) {
-    const fav = AppState.favorites[index];
-    const sizes = ['1x1', '2x1', '2x2'];
-    const currentIdx = sizes.indexOf(fav.size || '1x1');
-    const nextIdx = (currentIdx + 1) % sizes.length;
+// ==========================================
+// DRAG-TO-RESIZE LOGIC (V2)
+// ==========================================
+let resizeStart = { x: 0, y: 0 };
+let resizeInitialSize = '1x1';
+let resizingWidget = null;
+let resizingIndex = -1;
 
-    fav.size = sizes[nextIdx];
-    saveFavorites();
-    // Re-render efficiently
-    renderFavorites();
+function handleResizeStart(e) {
+    if (e.target.classList.contains('resize-handle')) {
+        e.stopPropagation(); // Don't trigger drag-and-drop
+        e.preventDefault();  // Prevent scrolling
+
+        const handle = e.target;
+        const widget = handle.closest('.favorite-item');
+        if (!widget) return;
+
+        resizingWidget = widget;
+        resizingIndex = parseInt(widget.dataset.index);
+        resizeInitialSize = widget.dataset.size || '1x1';
+
+        // Capture pointer
+        resizeStart = { x: e.clientX, y: e.clientY };
+        handle.setPointerCapture(e.pointerId);
+
+        handle.addEventListener('pointermove', handleResizeMove);
+        handle.addEventListener('pointerup', handleResizeEnd);
+        handle.addEventListener('pointercancel', handleResizeEnd);
+    }
+}
+
+function handleResizeMove(e) {
+    if (!resizingWidget) return;
+
+    const dx = e.clientX - resizeStart.x;
+    const dy = e.clientY - resizeStart.y;
+
+    // Parse current dimensions
+    let [cols, rows] = resizeInitialSize.split('x').map(Number); // e.g. [1, 1]
+
+    // Thresholds for expansion/contraction (50px drag)
+    const threshold = 50;
+
+    // Horizontal Logic
+    if (dx > threshold) cols = 2; // Expand width
+    if (dx < -threshold) cols = 1; // Contract width
+
+    // Vertical Logic
+    if (dy > threshold) rows = 2; // Expand height
+    if (dy < -threshold) rows = 1; // Contract height
+
+    // Cap dimensions (Max 2x2, Min 1x1)
+    if (cols > 2) cols = 2; if (cols < 1) cols = 1;
+    if (rows > 2) rows = 2; if (rows < 1) rows = 1;
+
+    // Valid sizes: 1x1, 2x1, 2x2.
+    if (cols === 1 && rows === 2) rows = 1; // Disallow 1x2
+
+    const newSize = `${cols}x${rows}`;
+    if (newSize !== resizingWidget.dataset.size) {
+        resizingWidget.dataset.size = newSize;
+        if (navigator.vibrate) navigator.vibrate(5); // Micro haptic
+    }
+}
+
+function handleResizeEnd(e) {
+    if (resizingWidget) {
+        const handle = e.target;
+        handle.releasePointerCapture(e.pointerId);
+        handle.removeEventListener('pointermove', handleResizeMove);
+        handle.removeEventListener('pointerup', handleResizeEnd);
+        handle.removeEventListener('pointercancel', handleResizeEnd);
+
+        // Save Change
+        if (resizingIndex > -1) {
+            AppState.favorites[resizingIndex].size = resizingWidget.dataset.size;
+            saveFavorites();
+            // Full render to cleanup styles (though dataset update is visual enough, full render ensures consistancy)
+            // renderFavorites(); // Optional: Might interrupt transition. Let's start with just saving.
+        }
+
+        resizingWidget = null;
+        resizingIndex = -1;
+    }
 }
 
 // ==========================================
@@ -146,7 +220,7 @@ function enableEditMode() {
     if (!doneBtn) {
         doneBtn = document.createElement('div');
         doneBtn.id = 'edit-done-overlay';
-        doneBtn.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; animation: slideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);';
+        doneBtn.style.cssText = 'position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; animation: slideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events: auto;';
         doneBtn.innerHTML = `<button class="btn-primary" style="box-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 0.75rem 2rem; font-weight: bold; border-radius: 50px;">Done</button>`;
         doneBtn.onclick = disableEditMode;
         document.body.appendChild(doneBtn);
@@ -198,19 +272,17 @@ function renderFavorites() {
         widget.dataset.id = fav.id;
         widget.dataset.index = index;
         widget.dataset.size = fav.size || '1x1';
-        widget.setAttribute('draggable', 'true'); // Always draggable potentially, or toggle
+        widget.setAttribute('draggable', 'true');
 
         // Content
         widget.innerHTML = `
-            <div class="favorite-actions">
-                <button class="widget-btn btn-resize" title="Resize">⤡</button>
-                <button class="widget-btn btn-delete" title="Remove">✕</button>
-            </div>
+            <div class="resize-handle"></div>
+            <button class="btn-delete" title="Remove">✕</button>
+            <div class="favorite-icon">${fav.icon || '📌'}</div>
             <div class="favorite-content">
-                <div class="favorite-icon">${fav.icon || '📌'}</div>
                 <div class="favorite-title">${fav.name}</div>
                 <div class="favorite-meta">
-                    ${fav.meta || fav.type}
+                    <span>${fav.meta || fav.type}</span>
                 </div>
             </div>
         `;
@@ -220,7 +292,7 @@ function renderFavorites() {
         let pressTimer;
         const startPress = (e) => {
             // Only if not already editing
-            if (!list.classList.contains('editing')) {
+            if (!list.classList.contains('editing') && !e.target.classList.contains('resize-handle')) {
                 pressTimer = setTimeout(() => enableEditMode(), 600);
             }
         };
@@ -233,13 +305,13 @@ function renderFavorites() {
         widget.addEventListener('mouseup', cancelPress);
         widget.addEventListener('mouseleave', cancelPress);
 
-        // 2. Click (Navigation vs Action)
+        // 2. Click Logic
         widget.addEventListener('click', (e) => {
-            // If clicking controls, ignore here (handled by bubble up capture or specific listeners)
-            if (e.target.closest('.widget-btn')) return;
+            // Handle controls
+            if (e.target.classList.contains('resize-handle')) return;
+            if (e.target.closest('.btn-delete')) return;
 
             if (list.classList.contains('editing')) {
-                // In edit mode, clicking body does nothing (or could toggle size?)
                 e.preventDefault();
                 return;
             }
@@ -249,16 +321,14 @@ function renderFavorites() {
                 showRecipeDetail(fav.name);
             } else if (fav.type === 'tip') {
                 navigateToSection('guides');
-                // ... tip scroll logic ...
             }
         });
 
-        // 3. Widget Controls
-        widget.querySelector('.btn-resize').addEventListener('click', (e) => {
-            e.stopPropagation();
-            resizeWidget(index);
-        });
+        // 3. Resize Handler (Pointer events for drag)
+        const handle = widget.querySelector('.resize-handle');
+        handle.addEventListener('pointerdown', handleResizeStart);
 
+        // 4. Delete Handler
         widget.querySelector('.btn-delete').addEventListener('click', (e) => {
             e.stopPropagation();
             if (confirm(`Remove "${fav.name}"?`)) {
@@ -266,7 +336,7 @@ function renderFavorites() {
             }
         });
 
-        // 4. Drag Events (Delegated or Attached)
+        // 5. Drag Events (For Reordering)
         widget.addEventListener('dragstart', handleWidgetDragStart);
         widget.addEventListener('dragover', handleWidgetDragOver);
         widget.addEventListener('drop', handleWidgetDrop);
