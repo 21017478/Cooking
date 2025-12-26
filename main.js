@@ -59,7 +59,6 @@ function setupEventListeners() {
     setupSearch();
     setupTipPinning();
     setupRecipeModal();
-    setupFavoriteReordering();
     setupThemeToggle();
     setupRecipeForm();
     setupPlanner();
@@ -2000,8 +1999,13 @@ function exportAllData() {
 // SUGGEST SYSTEM
 // ==========================================
 function setupSuggest() {
-    document.querySelectorAll('.suggest-card').forEach(card => {
+    const cards = document.querySelectorAll('.suggest-card');
+    console.log('[setupSuggest] Found', cards.length, 'suggest cards');
+
+    cards.forEach(card => {
+        console.log('[setupSuggest] Adding listener to', card.id, 'type:', card.dataset.type);
         card.addEventListener('click', () => {
+            console.log('[setupSuggest] Card clicked:', card.dataset.type);
             const type = card.dataset.type;
             if (!type) return;
 
