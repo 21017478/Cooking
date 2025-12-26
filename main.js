@@ -1439,7 +1439,7 @@ function openAddMealModal(dateKey) {
         ...AppState.customRecipes
     ].filter(r => !AppState.hiddenRecipes.includes(r.id));
 
-    // Create a quick-select modal
+    // Create a quick-select modal with search
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'addMealModal';
@@ -1460,14 +1460,12 @@ function openAddMealModal(dateKey) {
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Select Recipe</label>
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        ${allRecipes.map(r => `
-                            <div class="meal-select-item" data-recipe-id="${r.id}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-elevated);border-radius:8px;margin-bottom:0.5rem;cursor:pointer;">
-                                <span style="font-size:1.5rem;">${r.image || '🍽️'}</span>
-                                <span>${r.name}</span>
-                            </div>
-                        `).join('')}
+                    <label>Search Recipe</label>
+                    <input type="text" id="mealSearchInput" class="form-input" placeholder="🔍 Type to search..." autocomplete="off" style="margin-bottom: 0.75rem;">
+                </div>
+                <div class="form-group">
+                    <div id="mealRecipeList" style="max-height: 250px; overflow-y: auto;">
+                        <!-- Recipes will be rendered here -->
                     </div>
                 </div>
             </div>
@@ -1475,6 +1473,53 @@ function openAddMealModal(dateKey) {
     `;
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';
+
+    const listContainer = modal.querySelector('#mealRecipeList');
+    const searchInput = modal.querySelector('#mealSearchInput');
+
+    // Render recipes function
+    function renderRecipeList(filter = '') {
+        const filtered = allRecipes.filter(r =>
+            r.name.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (filtered.length === 0) {
+            listContainer.innerHTML = `<div style="text-align:center;padding:1rem;opacity:0.6;">No recipes found</div>`;
+            return;
+        }
+
+        listContainer.innerHTML = filtered.map(r => `
+            <div class="meal-select-item" data-recipe-id="${r.id}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-elevated);border-radius:8px;margin-bottom:0.5rem;cursor:pointer;transition:background 0.2s;">
+                <span style="font-size:1.5rem;">${r.image || '🍽️'}</span>
+                <span>${r.name}</span>
+            </div>
+        `).join('');
+
+        // Add click handlers
+        listContainer.querySelectorAll('.meal-select-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const recipeId = item.dataset.recipeId;
+                const recipe = allRecipes.find(r => r.id === recipeId);
+                const servings = parseInt(document.getElementById('mealServings').value);
+                if (recipe) {
+                    addMealToDay(dateKey, recipe, servings);
+                }
+                modal.remove();
+                document.body.style.overflow = '';
+            });
+        });
+    }
+
+    // Initial render (empty = show all)
+    renderRecipeList();
+
+    // Search input handler
+    searchInput.addEventListener('input', (e) => {
+        renderRecipeList(e.target.value);
+    });
+
+    // Focus search on open
+    setTimeout(() => searchInput.focus(), 100);
 
     // Close handlers
     modal.querySelector('#addMealClose').addEventListener('click', () => {
@@ -1486,20 +1531,6 @@ function openAddMealModal(dateKey) {
             modal.remove();
             document.body.style.overflow = '';
         }
-    });
-
-    // Recipe selection
-    modal.querySelectorAll('.meal-select-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const recipeId = item.dataset.recipeId;
-            const recipe = allRecipes.find(r => r.id === recipeId);
-            const servings = parseInt(document.getElementById('mealServings').value);
-            if (recipe) {
-                addMealToDay(dateKey, recipe, servings);
-            }
-            modal.remove();
-            document.body.style.overflow = '';
-        });
     });
 }
 
