@@ -2062,7 +2062,33 @@ function setupSuggest() {
                 recipeList = AppState.favorites.map(fav => allRecipes.find(r => r.id === fav.id) || fav);
                 label = 'Family Favorite';
             } else if (type === 'week') {
-                showToast('Week planner coming soon!');
+                // Auto-fill week with random recipes
+                const weekDates = getWeekDates();
+                let addedCount = 0;
+
+                weekDates.forEach(day => {
+                    // Only add if day is empty
+                    if (!AppState.weekPlan[day.dateKey] || AppState.weekPlan[day.dateKey].length === 0) {
+                        const randomRecipe = allRecipes[Math.floor(Math.random() * allRecipes.length)];
+                        if (randomRecipe) {
+                            addMealToDay(day.dateKey, randomRecipe, 4);
+                            addedCount++;
+                        }
+                    }
+                });
+
+                if (addedCount > 0) {
+                    showToast(`Added ${addedCount} meals to your week!`);
+                    // Navigate to planner tab
+                    document.querySelectorAll('.bottom-nav-btn, .desktop-nav-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.dataset.section === 'planner') btn.classList.add('active');
+                    });
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById('planner')?.classList.add('active');
+                } else {
+                    showToast('Week already has meals! Clear first.');
+                }
                 return;
             }
 
