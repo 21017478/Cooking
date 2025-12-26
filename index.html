@@ -1138,6 +1138,16 @@
             display: flex;
         }
 
+        /* Mobile/Touch Optimization: Always show actions on touch devices */
+        @media (hover: none) {
+            .recipe-card-actions {
+                display: flex;
+                background: var(--bg-overlay);
+                border-radius: 8px;
+                padding: 4px;
+            }
+        }
+
         .recipe-card-action {
             background: var(--bg-elevated);
             border: 1px solid var(--border);
@@ -1462,6 +1472,84 @@
         .text-muted {
             color: var(--text-muted);
         }
+
+        /* ==========================================
+           INSTALL BANNER
+           ========================================== */
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            background: var(--bg-elevated);
+            border: 1px solid var(--primary);
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 2000;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .install-banner.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .install-content strong {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+
+        .install-content p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        .install-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-left: auto;
+        }
+
+        .btn-install {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-install:hover {
+            background: var(--primary-light);
+        }
+
+        .btn-dismiss {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-dismiss:hover {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+        }
     </style>
 </head>
 
@@ -1482,6 +1570,7 @@
                 <button class="desktop-nav-btn" data-section="guides">💡 Guides</button>
             </nav>
             <div class="header-actions">
+                <button class="header-btn" id="backup-btn" title="Export Data">💾</button>
                 <button class="header-btn" id="theme-toggle" title="Toggle theme">🌙</button>
             </div>
         </div>

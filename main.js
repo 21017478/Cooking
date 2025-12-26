@@ -30,7 +30,11 @@ const AppState = {
 // ==========================================
 // INITIALIZATION
 // ==========================================
+// ==========================================
+// INITIALIZATION
+// ==========================================
 function initializeApp() {
+    // 1. Load Data
     loadFavorites();
     loadNotes();
     loadTheme();
@@ -38,8 +42,18 @@ function initializeApp() {
     loadHiddenRecipes();
     loadWeekPlan();
     loadShoppingList();
+
+    // 2. Render UI
     renderRecipeCards();
     renderFavorites();
+    renderWeekPlanner();
+    renderShoppingList();
+
+    // 3. Setup Interactions
+    setupEventListeners();
+}
+
+function setupEventListeners() {
     setupNavigation();
     setupFiltering();
     setupSearch();
@@ -51,18 +65,15 @@ function initializeApp() {
     setupPlanner();
     setupShopping();
     setupSuggest();
+    setupInstallPrompt();
+    setupBackup();
 }
 
 // ==========================================
 // FAVORITES SYSTEM (Universal)
 // ==========================================
 function loadFavorites() {
-    try {
-        const stored = localStorage.getItem('vacuprep_favorites');
-        AppState.favorites = stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        AppState.favorites = [];
-    }
+    AppState.favorites = safeJSONParse('vacuprep_favorites', []);
 }
 
 function saveFavorites() {
@@ -708,14 +719,7 @@ function filterRecipes() {
 // ==========================================
 // RECIPE NOTES
 // ==========================================
-function loadNotes() {
-    try {
-        const stored = localStorage.getItem('vacuprep_notes');
-        AppState.notes = stored ? JSON.parse(stored) : {};
-    } catch (e) {
-        AppState.notes = {};
-    }
-}
+
 
 function saveNotes() {
     localStorage.setItem('vacuprep_notes', JSON.stringify(AppState.notes));
@@ -757,14 +761,7 @@ function updateNoteBadges() {
 // ==========================================
 // CUSTOM RECIPES SYSTEM
 // ==========================================
-function loadCustomRecipes() {
-    try {
-        const stored = localStorage.getItem('vacuprep_custom_recipes');
-        AppState.customRecipes = stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        AppState.customRecipes = [];
-    }
-}
+
 
 function saveCustomRecipes() {
     localStorage.setItem('vacuprep_custom_recipes', JSON.stringify(AppState.customRecipes));
@@ -773,14 +770,7 @@ function saveCustomRecipes() {
 // ==========================================
 // HIDDEN RECIPES SYSTEM
 // ==========================================
-function loadHiddenRecipes() {
-    try {
-        const stored = localStorage.getItem('vacuprep_hidden_recipes');
-        AppState.hiddenRecipes = stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        AppState.hiddenRecipes = [];
-    }
-}
+
 
 function saveHiddenRecipes() {
     localStorage.setItem('vacuprep_hidden_recipes', JSON.stringify(AppState.hiddenRecipes));
@@ -1111,14 +1101,7 @@ function parseRecipeText(text) {
 // ==========================================
 // WEEK PLANNER SYSTEM
 // ==========================================
-function loadWeekPlan() {
-    try {
-        const stored = localStorage.getItem('vacuprep_week_plan');
-        AppState.weekPlan = stored ? JSON.parse(stored) : {};
-    } catch (e) {
-        AppState.weekPlan = {};
-    }
-}
+
 
 function saveWeekPlan() {
     localStorage.setItem('vacuprep_week_plan', JSON.stringify(AppState.weekPlan));
@@ -1195,12 +1178,16 @@ function addMealToDay(dateKey, recipe, servings = 4) {
     if (!AppState.weekPlan[dateKey]) {
         AppState.weekPlan[dateKey] = [];
     }
+
+    // Use smart extractor
+    const ingredients = extractIngredientsFromRecipe(recipe);
+
     AppState.weekPlan[dateKey].push({
         recipeId: recipe.id || recipe.name,
         name: recipe.name,
         icon: recipe.image || '🍽️',
         servings: servings,
-        ingredients: recipe.ingredients || []
+        ingredients: ingredients
     });
     saveWeekPlan();
     renderWeekPlanner();
@@ -1319,13 +1306,29 @@ function setupPlanner() {
 // ==========================================
 // SHOPPING LIST SYSTEM
 // ==========================================
+// In loadNotes
+function loadNotes() {
+    AppState.notes = safeJSONParse('vacuprep_notes', {});
+}
+
+// In loadCustomRecipes
+function loadCustomRecipes() {
+    AppState.customRecipes = safeJSONParse('vacuprep_custom_recipes', []);
+}
+
+// In loadHiddenRecipes
+function loadHiddenRecipes() {
+    AppState.hiddenRecipes = safeJSONParse('vacuprep_hidden_recipes', []);
+}
+
+// In loadWeekPlan
+function loadWeekPlan() {
+    AppState.weekPlan = safeJSONParse('vacuprep_week_plan', {});
+}
+
+// In loadShoppingList
 function loadShoppingList() {
-    try {
-        const stored = localStorage.getItem('vacuprep_shopping_list');
-        AppState.shoppingList = stored ? JSON.parse(stored) : [];
-    } catch (e) {
-        AppState.shoppingList = [];
-    }
+    AppState.shoppingList = safeJSONParse('vacuprep_shopping_list', []);
 }
 
 function saveShoppingList() {
@@ -1376,25 +1379,57 @@ function renderShoppingList() {
 function generateShoppingList() {
     const itemsMap = new Map();
 
-    // Collect all ingredients from week plan
+    // Re-verify specific built-in recipes if ingredients are missing in the plan
+    // This handles old plans or cases where extraction was skipped
+    const allRecipes = [
+        ...(typeof recipes !== 'undefined' ? recipes : []),
+        ...AppState.customRecipes
+    ];
+
     Object.values(AppState.weekPlan).forEach(dayMeals => {
         dayMeals.forEach(meal => {
-            const multiplier = meal.servings / 4; // Assume base recipe is 4 servings
-            (meal.ingredients || []).forEach(ing => {
-                const normalized = ing.toLowerCase().trim();
+            let ingredients = meal.ingredients || [];
+
+            // If no ingredients stored, try to re-fetch recipe and extract
+            if (ingredients.length === 0) {
+                const originalRecipe = allRecipes.find(r => r.id === meal.recipeId || r.name === meal.name);
+                if (originalRecipe) {
+                    ingredients = extractIngredientsFromRecipe(originalRecipe);
+                    // Update the meal in the plan so we don't need to do this again
+                    meal.ingredients = ingredients;
+                }
+            }
+
+            // Add to map
+            ingredients.forEach(ing => {
+                const normalized = ing.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+                if (!normalized) return;
+
                 if (itemsMap.has(normalized)) {
-                    // Already exists, just note we found another
                     const existing = itemsMap.get(normalized);
                     existing.count = (existing.count || 1) + 1;
+                    // Keep the name that has the most capitalization/niceness? Just keep first for now.
                 } else {
-                    itemsMap.set(normalized, { name: ing, qty: 'as needed', checked: false });
+                    itemsMap.set(normalized, {
+                        name: ing,
+                        qty: meal.servings > 4 ? 'Large batch' : '1 batch',
+                        count: 1,
+                        checked: false
+                    });
                 }
             });
         });
     });
 
+    // Save potentially updated plan (if we backfilled ingredients)
+    saveWeekPlan();
+
     // Convert to array
     AppState.shoppingList = Array.from(itemsMap.values());
+    if (AppState.shoppingList.length === 0) {
+        alert("No ingredients found for planned meals. Please check the recipes.");
+    }
+
     saveShoppingList();
     renderShoppingList();
 }
@@ -1617,4 +1652,121 @@ function setupSuggest() {
             alert(`Added "${AppState.currentSuggestion.name}" to today's plan!`);
         }
     });
+}
+
+// ==========================================
+// UTILITIES
+// ==========================================
+function safeJSONParse(key, fallback) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : fallback;
+    } catch (e) {
+        console.warn('JSON Parse Error for key:', key, e);
+        return fallback;
+    }
+}
+
+function extractIngredientsFromRecipe(recipe) {
+    // Phase 5: Standardized Data
+    // Use the pre-parsed ingredients array if available
+    if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+        return recipe.ingredients;
+    }
+    return [];
+}
+
+// ==========================================
+// PWA INSTALL PROMPT
+// ==========================================
+let deferredPrompt;
+
+function setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI to notify the user they can add to home screen
+        showInstallBanner();
+    });
+}
+
+function showInstallBanner() {
+    // Only show if not dismissed
+    if (localStorage.getItem('vacuprep_install_dismissed')) return;
+
+    const banner = document.createElement('div');
+    banner.className = 'install-banner';
+    banner.innerHTML = `
+        <div class="install-content">
+            <strong>Install App</strong>
+            <p>Add to home screen for offline access</p>
+        </div>
+        <div class="install-actions">
+            <button class="btn-dismiss">✕</button>
+            <button class="btn-install">Install</button>
+        </div>
+    `;
+
+    document.body.appendChild(banner);
+
+    // Trigger reflow
+    banner.offsetHeight;
+    banner.classList.add('visible');
+
+    banner.querySelector('.btn-install').addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                deferredPrompt = null;
+            }
+            banner.classList.remove('visible');
+            setTimeout(() => banner.remove(), 300);
+        }
+    });
+
+    banner.querySelector('.btn-dismiss').addEventListener('click', () => {
+        banner.classList.remove('visible');
+        setTimeout(() => banner.remove(), 300);
+        localStorage.setItem('vacuprep_install_dismissed', 'true');
+    });
+}
+
+// ==========================================
+// DATA BACKUP
+// ==========================================
+function setupBackup() {
+    const backupBtn = document.getElementById('backup-btn');
+    if (backupBtn) {
+        backupBtn.addEventListener('click', () => {
+            if (confirm('Download a backup of all your data (recipes, plans, lists)?')) {
+                exportAllData();
+            }
+        });
+    }
+}
+
+function exportAllData() {
+    const data = {
+        version: 1,
+        timestamp: new Date().toISOString(),
+        weekPlan: AppState.weekPlan,
+        shoppingList: AppState.shoppingList,
+        favorites: AppState.favorites,
+        customRecipes: AppState.customRecipes,
+        notes: AppState.notes,
+        hiddenRecipes: AppState.hiddenRecipes,
+        dismissedInstall: localStorage.getItem('vacuprep_install_dismissed')
+    };
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vacuprep-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
 }

@@ -1,0 +1,43 @@
+{
+  "name": "Vacuum Guide",
+  "short_name": "VacuumGuide",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/screenshots/screen_home.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home Screen"
+    },
+    {
+      "src": "assets/screenshots/screen_recipes.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Recipe Collection"
+    },
+    {
+      "src": "assets/screenshots/screen_detail.png",
+      "sizes": "375x812",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Recipe Detail"
+    }
+  ]
+}

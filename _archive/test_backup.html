@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete guide to vacuum sealing - benefits, safety, and 25+ meal prep ideas">
+    <title>Vacuum Sealer Guide - Master Food Preservation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: hsl(260, 85%, 65%);
+            --primary-dark: hsl(260, 85%, 55%);
+            --secondary: hsl(190, 85%, 60%);
+            --accent: hsl(320, 85%, 65%);
+            --bg-dark: hsl(240, 15%, 8%);
+            --bg-card: hsl(240, 12%, 12%);
+            --bg-glass: hsla(240, 12%, 18%, 0.6);
+            --text-primary: hsl(0, 0%, 95%);
+            --text-secondary: hsl(0, 0%, 70%);
+            --text-muted: hsl(0, 0%, 50%);
+            --success: hsl(140, 70%, 55%);
+            --warning: hsl(45, 95%, 60%);
+            --danger: hsl(5, 85%, 60%);
+            --border: hsla(0, 0%, 100%, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, hsla(260, 85%, 45%, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, hsla(190, 85%, 45%, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, hsla(320, 85%, 45%, 0.1) 0%, transparent 50%);
+            z-index: -1;
+            animation: bgShift 20s ease infinite;
+        }
+
+        @keyframes bgShift {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-color: var(--primary);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .hero-image {
+            max-width: 600px;
+            margin: 2rem auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-image img {
+            width: 100%;
+            display: block;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sections */
+        .section {
+            display: none;
+            padding: 2rem 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        /* Benefits Grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .benefit-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+        }
+
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .benefit-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 1.25rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .alert-warning {
+            background: hsla(45, 95%, 60%, 0.1);
+            border-color: var(--warning);
+            color: var(--text-primary);
+        }
+
+        .alert-danger {
+            background: hsla(5, 85%, 60%, 0.1);
+            border-color: var(--danger);
+            color: var(--text-primary);
+        }
+
+        .alert h4 {
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert-icon {
+            font-size: 1.5rem;
+        }
+
+        /* Safety Items */
+        .safety-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .safety-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--danger);
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+        }
+
+        .safety-item:hover {
+            border-left-color: var(--warning);
+            transform: translateX(4px);
+        }
+
+        .safety-item h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .safety-item p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .safety-exception {
+            background: hsla(140, 70%, 55%, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .safety-exception strong {
+            color: var(--success);
+        }
+
+        /* Meal Ideas */
+        .filter-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1.25rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-glass);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .meal-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .meal-card.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--secondary);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .meal-category {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .meal-card h5 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .meal-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .meal-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .meal-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-muted);
+        }
+
+        /* Best Practices */
+        .practice-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .practice-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .practice-item:hover {
+            border-color: var(--success);
+            transform: translateX(4px);
+        }
+
+        .practice-icon {
+            font-size: 1.75rem;
+            flex-shrink: 0;
+        }
+
+        .practice-content h5 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .practice-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .meal-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                justify-content: center;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            header {
+                position: static;
+            }
+
+            .section {
+                display: block !important;
+            }
+
+            .glass-card,
+            .benefit-card,
+            .meal-card {
+                break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>🔒 Vacuum Sealer Guide</h1>
+                <nav>
+                    <button class="nav-btn active" data-section="benefits">Benefits</button>
+                    <button class="nav-btn" data-section="safety">Safety</button>
+                    <button class="nav-btn" data-section="meals">Meal Ideas</button>
+                    <button class="nav-btn" data-section="practices">Best Practices</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="hero">
+            <h2>Master the Art of Food Preservation</h2>
+            <p>Unlock the full potential of your vacuum sealer with science-backed benefits, essential safety
+                guidelines, and 25+ creative meal prep ideas.</p>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="complete-food-ideas.md" download
+                    style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                    📋 Download Complete Food Ideas (50+ Recipes)
+                </a>
+                <a href="premium-meal-combinations.md" download
+                    style="padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--accent), var(--primary)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: all 0.3s ease;">
+                    ⭐ Download Premium Meal Combinations (12 Complete Meals)
+                </a>
+            </div>
+        </div>
+
+        <!-- Benefits Section -->
+        <section id="benefits" class="section active">
+            <h3>Why Vacuum Sealing is a Game Changer</h3>
+
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h4>Lightning-Fast Marination</h4>
+                    <p>Reduce marination time from hours to just 15-30 minutes! Vacuum pressure opens food fibers,
+                        forcing marinade deep inside for maximum flavor penetration.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🧊</div>
+                    <h4>Extended Shelf Life</h4>
+                    <p>Keep foods fresh 3-5x longer. Chicken lasts 1-2 years frozen (vs 6-12 months), ground beef 2-3
+                        years (vs 6 months). Save money, reduce waste.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">❄️</div>
+                    <h4>Zero Freezer Burn</h4>
+                    <p>Eliminate air contact completely to prevent ice crystals that damage taste, texture, and color.
+                        Your food stays as fresh as the day you sealed it.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">🌟</div>
+                    <h4>Locked-In Flavor</h4>
+                    <p>Preserve volatile compounds and prevent oxidation. Every meal tastes vibrant and fresh, with all
+                        nutrients and aromas intact.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">💧</div>
+                    <h4>Superior Moisture Retention</h4>
+                    <p>Marinades penetrate deep, keeping meats incredibly juicy during cooking. Say goodbye to dry,
+                        overcooked proteins.</p>
+                </div>
+
+                <div class="benefit-card">
+                    <div class="benefit-icon">📦</div>
+                    <h4>Space-Saving Storage</h4>
+                    <p>Flatten sealed packages to stack efficiently in your freezer. Organize better, store more, find
+                        everything easily.</p>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h4>The Science Behind Vacuum Marination</h4>
+                <p>When air is removed from the bag, lower pressure causes microscopic pores in food to expand. As the
+                    vacuum releases, marinade is rapidly forced into these spaces and deep into the cellular
+                    structure—like a sponge being squeezed and released in liquid.</p>
+                <p style="margin-top: 1rem;">While some studies show only 1% marinade absorption increase, real-world
+                    experience from chefs and home cooks consistently demonstrates dramatically improved flavor depth
+                    and tenderness, especially for time-sensitive preparations.</p>
+            </div>
+
+            <div class="glass-card">
+                <h4>Wet Aging vs Traditional Storage</h4>
+                <p><strong>Wet Aging</strong> is what happens when you vacuum seal meat. The meat ages in its own juices
+                    under refrigeration, allowing natural enzymes to break down connective tissues and tenderize the
+                    meat. Benefits include:</p>
+                <ul style="margin-top: 0.75rem; margin-left: 1.5rem; color: var(--text-secondary);">
+                    <li>Enhanced tenderness without moisture loss</li>
+                    <li>Fresh, subtle, beef-forward flavor</li>
+                    <li>Faster than dry aging (7-28 days typical)</li>
+                    <li>More affordable with higher yield</li>
+                    <li>Perfect for leaner cuts that need moisture retention</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Safety Section -->
+        <section id="safety" class="section">
+            <h3>Critical Safety Guidelines</h3>
+
+            <div class="alert alert-danger">
+                <h4><span class="alert-icon">⚠️</span> Foods You Should NEVER Vacuum Seal</h4>
+                <p>The anaerobic (oxygen-free) environment created by vacuum sealing can promote dangerous bacterial
+                    growth, particularly <em>Clostridium botulinum</em>, which causes botulism—a potentially fatal
+                    illness. Always follow these safety rules.</p>
+            </div>
+
+            <div class="safety-list">
+                <div class="safety-item">
+                    <h5>🧄 Raw Garlic & Onions</h5>
+                    <p><strong>Risk:</strong> Can foster <em>Clostridium botulinum</em> growth, producing deadly
+                        botulism toxin in oxygen-free environments.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Freeze first before sealing, or seal after cooking and
+                        cooling to room temperature.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🧀 Soft Cheeses (Brie, Camembert, Feta)</h5>
+                    <p><strong>Risk:</strong> Harbor anaerobic bacteria that thrive without oxygen. Can develop
+                        unpleasant smell and crushed texture.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Hard and semi-hard cheeses are safe to vacuum seal.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🍄 Raw Mushrooms</h5>
+                    <p><strong>Risk:</strong> High moisture content causes rapid spoilage and sliminess. Bacteria thrive
+                        in sealed environment.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Dried mushrooms can be safely vacuum sealed and frozen.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🥦 Raw Cruciferous Vegetables (Broccoli, Cauliflower, Cabbage, Brussels Sprouts)</h5>
+                    <p><strong>Risk:</strong> Naturally emit sulfur gases that become trapped, causing bag inflation or
+                        bursting and accelerated spoilage.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Blanch in boiling water for 2-3 minutes, transfer to ice
+                        bath, dry thoroughly, cool completely, then seal and freeze.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🥬 Fermented Foods (Kimchi, Sauerkraut)</h5>
+                    <p><strong>Risk:</strong> Produce gases during fermentation that can cause bags to expand and
+                        explode.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Only vacuum seal AFTER fermentation process is completely
+                        finished.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🔥 Hot or Warm Foods</h5>
+                    <p><strong>Risk:</strong> Creates condensation inside bag, promoting bacterial growth and causing
+                        seal failure. Food can dry out and lose flavor.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> ALWAYS cool cooked foods completely to room temperature
+                        before sealing.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🫐 Fresh Berries</h5>
+                    <p><strong>Risk:</strong> Delicate structure gets crushed by vacuum pressure, damaging skins and
+                        accelerating spoilage.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Flash-freeze on a tray first to maintain shape, then seal.
+                        Or store in airtight container with paper towels.
+                    </div>
+                </div>
+
+                <div class="safety-item">
+                    <h5>🍌 Raw Bananas</h5>
+                    <p><strong>Risk:</strong> Release ethylene gas that accelerates ripening, leading to faster spoilage
+                        when sealed.</p>
+                    <div class="safety-exception">
+                        <strong>✓ Safe Alternative:</strong> Peel bananas, vacuum seal, then freeze.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Meal Ideas Section -->
+        <section id="meals" class="section">
+            <h3>25+ Meal Prep Ideas</h3>
+
+            <div class="alert alert-warning">
+                <h4><span class="alert-icon">💡</span> Pro Tip</h4>
+                <p>For best results, always label bags with contents and date. Flatten packages before freezing for
+                    faster thawing and better storage. When sealing liquids (marinades), use pulse function or
+                    pre-freeze to prevent liquid being pulled into sealer.</p>
+            </div>
+
+            <div class="filter-bar">
+                <button class="filter-btn active" data-category="all">All Ideas</button>
+                <button class="filter-btn" data-category="beef">Beef</button>
+                <button class="filter-btn" data-category="chicken">Chicken</button>
+                <button class="filter-btn" data-category="lamb">Lamb</button>
+                <button class="filter-btn" data-category="pork">Pork</button>
+                <button class="filter-btn" data-category="seafood">Seafood</button>
+                <button class="filter-btn" data-category="vegetables">Vegetables</button>
+            </div>
+
+            <div class="meal-grid">
+                <!-- Beef Ideas -->
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🍔 Seasoned Smash Burger Patties</h5>
+                    <p>Season ground beef with salt, pepper, garlic powder, and onion powder. Form into thin rounds,
+                        vacuum seal flat, and freeze. Pull one out for instant smash burgers on the griddle!</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 2-3 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🥙 Turkish Kofta Mix</h5>
+                    <p>Combine ground beef with minced parsley, cumin, coriander, paprika, garlic, and pepper. Vacuum
+                        seal in portions. When ready, shape onto skewers and grill for authentic kofta kebabs.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 2-3 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🌮 Pre-Cooked Taco Meat</h5>
+                    <p>Brown ground beef with taco seasoning, cumin, chili powder, and garlic. Cool completely, portion
+                        into meal-sized bags, and seal. Quick taco nights in minutes!</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🧆 Italian Meatball Mix</h5>
+                    <p>Season ground beef with breadcrumbs, parmesan, Italian herbs, egg, and garlic. Vacuum seal
+                        uncooked in portions. When needed, roll into balls and cook in sauce.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 2-3 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🍝 Bolognese Sauce Base</h5>
+                    <p>Make a large batch of bolognese sauce with ground beef, tomatoes, wine, and herbs. Cool and
+                        portion into vacuum bags. Perfect for quick pasta nights.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 45 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="beef">
+                    <span class="meal-category">Beef</span>
+                    <h5>🌶️ Chili Starter</h5>
+                    <p>Brown ground beef with onions, garlic, and bell peppers. Cool, portion, and vacuum seal. Add
+                        beans and tomatoes when ready to cook for instant chili.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 25 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <!-- Chicken Ideas -->
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🥙 Homemade Doner Kebab</h5>
+                    <p>Slice chicken thighs thinly, marinate with yogurt, paprika, cumin, oregano, garlic, and lemon.
+                        Vacuum seal for 30 min or freeze. Grill or pan-fry for authentic doner!</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🍢 Healthy Chicken Kofte</h5>
+                    <p>Mix ground chicken with parsley, mint, cumin, paprika, garlic, and breadcrumbs. Vacuum seal in
+                        portions. Shape and grill when ready for lean, flavorful kofte.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🍖 BBQ Marinated Chicken Breasts</h5>
+                    <p>Coat chicken breasts in your favorite BBQ sauce, seal, and marinate for 30 minutes or freeze.
+                        Grill or bake straight from frozen for easy dinners.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🌶️ Teriyaki Chicken Thighs</h5>
+                    <p>Marinate chicken thighs in homemade teriyaki sauce (soy sauce, ginger, garlic, honey). Vacuum
+                        seal for instant absorption, freeze, and cook when needed.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🥗 Pre-Cooked Shredded Chicken</h5>
+                    <p>Slow-cook or pressure-cook chicken breast, shred, and seal with a bit of broth. Perfect for
+                        salads, wraps, sandwiches, and casseroles.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 60 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🌮 Chicken Fajita Strips</h5>
+                    <p>Slice chicken breast into strips, marinate with lime juice, cumin, chili powder, and peppers.
+                        Vacuum seal and freeze. Quick fajitas anytime!</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="chicken">
+                    <span class="meal-category">Chicken</span>
+                    <h5>🍛 Chicken Curry Portions</h5>
+                    <p>Make a large batch of your favorite chicken curry. Cool completely, portion into meal-sized bags,
+                        and vacuum seal. Reheat with rice for instant meals.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 50 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <!-- Lamb Ideas -->
+                <div class="meal-card show" data-category="lamb">
+                    <span class="meal-category">Lamb</span>
+                    <h5>🥙 Lamb Kofta Mix</h5>
+                    <p>Combine ground lamb with mint, parsley, cumin, coriander, cinnamon, and garlic. Vacuum seal in
+                        portions. Shape onto skewers when ready for authentic Middle Eastern flavor.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 2-3 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="lamb">
+                    <span class="meal-category">Lamb</span>
+                    <h5>🍖 Marinated Lamb Chops</h5>
+                    <p>Marinate lamb chops in rosemary, garlic, lemon, and olive oil. Vacuum seal for fast marination
+                        (30 min) or freeze. Grill for elegant dinners.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="lamb">
+                    <span class="meal-category">Lamb</span>
+                    <h5>🍲 Slow-Cook Lamb Shoulder Portions</h5>
+                    <p>Cut lamb shoulder into chunks, season with Moroccan spices. Vacuum seal in meal portions. Perfect
+                        for slow cooker tagines and stews.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <!-- Pork Ideas -->
+                <div class="meal-card show" data-category="pork">
+                    <span class="meal-category">Pork</span>
+                    <h5>🥩 Marinated Pork Chops</h5>
+                    <p>Marinate pork chops in apple cider, sage, and garlic. Vacuum seal for quick absorption or freeze.
+                        Pan-sear or grill for juicy, flavorful chops.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 1-2 years frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="pork">
+                    <span class="meal-category">Pork</span>
+                    <h5>🍖 Pulled Pork Portions</h5>
+                    <p>Slow-cook pork shoulder with BBQ spices, shred, and mix with sauce. Cool and vacuum seal in
+                        portions. Quick sandwiches and tacos ready in minutes.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 6 hours prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="pork">
+                    <span class="meal-category">Pork</span>
+                    <h5>🥓 Breakfast Sausage Patties</h5>
+                    <p>Mix ground pork with sage, fennel, thyme, and maple syrup. Form into patties, vacuum seal in
+                        portions. Perfect for quick breakfast prep.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 2-3 years frozen</span>
+                    </div>
+                </div>
+
+                <!-- Seafood Ideas -->
+                <div class="meal-card show" data-category="seafood">
+                    <span class="meal-category">Seafood</span>
+                    <h5>🐟 Marinated Salmon Fillets</h5>
+                    <p>Marinate salmon in soy sauce, honey, ginger, and sesame oil. Vacuum seal for 20-minute marination
+                        or freeze. Bake or pan-sear for restaurant-quality fish.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="seafood">
+                    <span class="meal-category">Seafood</span>
+                    <h5>🐠 Pre-Portioned White Fish</h5>
+                    <p>Portion cod, haddock, or tilapia fillets individually. Vacuum seal with lemon slices and herbs.
+                        Grab one fillet at a time for quick, healthy dinners.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 10 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="seafood">
+                    <span class="meal-category">Seafood</span>
+                    <h5>🦐 Ready-to-Cook Shrimp</h5>
+                    <p>Peel and devein shrimp, portion into meal sizes, and vacuum seal. Optionally add garlic butter or
+                        scampi marinade. Thaw and cook in 10 minutes.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <!-- Vegetable Ideas -->
+                <div class="meal-card show" data-category="vegetables">
+                    <span class="meal-category">Vegetables</span>
+                    <h5>🥕 Blanched Stir-Fry Mix</h5>
+                    <p>Blanch mixed vegetables (broccoli, carrots, peppers, snap peas), cool in ice bath, dry
+                        thoroughly, and vacuum seal. Ready for instant stir-fries.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 30 min prep</span>
+                        <span>❄️ 12-18 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="vegetables">
+                    <span class="meal-category">Vegetables</span>
+                    <h5>🥬 Blanched Green Beans</h5>
+                    <p>Trim and blanch green beans for 2-3 minutes, ice bath, dry completely, and vacuum seal. Perfect
+                        side dish ready in minutes—just sauté with garlic and butter.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 20 min prep</span>
+                        <span>❄️ 12-18 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="vegetables">
+                    <span class="meal-category">Vegetables</span>
+                    <h5>🍆 Marinated Grilling Vegetables</h5>
+                    <p>Slice zucchini, eggplant, and bell peppers. Marinate in balsamic vinegar, olive oil, and Italian
+                        herbs. Vacuum seal and freeze. Grill from frozen for easy BBQ sides.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 15 min prep</span>
+                        <span>❄️ 8-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="vegetables">
+                    <span class="meal-category">Vegetables</span>
+                    <h5>🍚 Pre-Cooked Rice Portions</h5>
+                    <p>Cook large batches of rice (white, brown, or jasmine). Cool completely, flatten into meal
+                        portions, and vacuum seal. Microwave from frozen for instant sides.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 30 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+
+                <div class="meal-card show" data-category="vegetables">
+                    <span class="meal-category">Vegetables</span>
+                    <h5>🥔 Mashed Potato Portions</h5>
+                    <p>Make creamy mashed potatoes, cool completely, and vacuum seal in family-sized portions. Reheat in
+                        microwave or oven for quick comfort food.</p>
+                    <div class="meal-meta">
+                        <span>⏱️ 40 min prep</span>
+                        <span>❄️ 6-12 months frozen</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Best Practices Section -->
+        <section id="practices" class="section">
+            <h3>Best Practices for Success</h3>
+
+            <div class="practice-list">
+                <div class="practice-item">
+                    <div class="practice-icon">🌡️</div>
+                    <div class="practice-content">
+                        <h5>Always Cool Completely</h5>
+                        <p>Never vacuum seal hot or warm food. Let cooked items cool to room temperature first to
+                            prevent condensation, bacterial growth, and seal failure. This is critical for food safety.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">🏷️</div>
+                    <div class="practice-content">
+                        <h5>Label Everything</h5>
+                        <p>Always label bags with contents and date sealed. Use permanent marker or freezer labels. This
+                            helps track freshness and makes meal planning easier. Include cooking notes if helpful.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">⚖️</div>
+                    <div class="practice-content">
+                        <h5>Portion Control</h5>
+                        <p>Divide food into meal-sized or single-serving portions before sealing. This prevents waste
+                            and makes it easy to thaw only what you need. Consider your household size when portioning.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">📏</div>
+                    <div class="practice-content">
+                        <h5>Flatten for Efficiency</h5>
+                        <p>Flatten ground meat and other foods in bags before freezing. This optimizes freezer space,
+                            allows neat stacking, and enables faster, more even thawing when needed.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">💧</div>
+                    <div class="practice-content">
+                        <h5>Handle Liquids Carefully</h5>
+                        <p>When sealing marinades or sauces, use the "pulse" vacuum function to prevent liquid being
+                            sucked into the machine. Alternatively, pre-freeze liquids until solid, or elevate the
+                            sealer and let the bag hang down.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">🧊</div>
+                    <div class="practice-content">
+                        <h5>Thaw Properly</h5>
+                        <p>Thaw vacuum-sealed foods in the refrigerator overnight for best quality and safety. For
+                            faster thawing, submerge the sealed bag in cold water. Never thaw at room temperature.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">🔒</div>
+                    <div class="practice-content">
+                        <h5>Double Seal for Long-Term Storage</h5>
+                        <p>For foods you plan to store 6+ months, consider double-sealing the ends of bags for extra
+                            security. This provides additional protection against freezer burn and air infiltration.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">🧼</div>
+                    <div class="practice-content">
+                        <h5>Keep Equipment Clean</h5>
+                        <p>Wipe down your vacuum sealer after each use. Check the gaskets regularly for debris. Clean
+                            vacuum channel if liquid gets pulled in. Proper maintenance extends machine life.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">❄️</div>
+                    <div class="practice-content">
+                        <h5>Flash-Freeze Delicate Items</h5>
+                        <p>For items that might stick together (chicken cutlets, burger patties, individual portions),
+                            pre-freeze on a tray first, then vacuum seal together. This prevents them from clumping.</p>
+                    </div>
+                </div>
+
+                <div class="practice-item">
+                    <div class="practice-icon">📋</div>
+                    <div class="practice-content">
+                        <h5>Organize Your Freezer</h5>
+                        <p>Group similar items together and use bins or dividers. Keep a freezer inventory list on your
+                            phone or fridge. Rotate older items to the front (first in, first out).</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card" style="margin-top: 2rem;">
+                <h4>Vacuum Sealing Storage Times</h4>
+                <p>These are approximate maximum storage times for vacuum-sealed foods in the freezer:</p>
+                <ul style="margin-top: 1rem; margin-left: 1.5rem; color: var(--text-secondary); line-height: 1.8;">
+                    <li><strong>Ground Beef/Pork:</strong> 2-3 years (vs 6 months unsealed)</li>
+                    <li><strong>Chicken/Turkey:</strong> 1-2 years (vs 6-12 months unsealed)</li>
+                    <li><strong>Fish/Seafood:</strong> 1-2 years (vs 6-8 months unsealed)</li>
+                    <li><strong>Cooked Meals:</strong> 6-12 months (vs 3-6 months unsealed)</li>
+                    <li><strong>Vegetables (blanched):</strong> 12-18 months (vs 8-10 months unsealed)</li>
+                    <li><strong>Hard Cheeses:</strong> 4-8 months frozen (vs 2-3 months unsealed)</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🔒 Vacuum Sealer Guide • Keep food fresh, save money, reduce waste</p>
+            <p style="margin-top: 0.5rem; font-size: 0.85rem;">For best results, always follow food safety guidelines
+                and manufacturer instructions for your specific vacuum sealer.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const sections = document.querySelectorAll('.section');
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetSection = btn.dataset.section;
+
+                // Update active button
+                navBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Update active section
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                    if (section.id === targetSection) {
+                        section.classList.add('active');
+                    }
+                });
+
+                // Smooth scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Meal filtering
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const mealCards = document.querySelectorAll('.meal-card');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+
+                // Update active filter button
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Filter meal cards
+                mealCards.forEach(card => {
+                    if (category === 'all' || card.dataset.category === category) {
+                        card.classList.add('show');
+                    } else {
+                        card.classList.remove('show');
+                    }
+                });
+            });
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

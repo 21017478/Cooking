@@ -1,0 +1,6 @@
+{
+  "appId": "com.vacuumguide.app",
+  "appName": "Vacuum Guide",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
