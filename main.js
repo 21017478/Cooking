@@ -274,6 +274,53 @@ function renderFavorites() {
         widget.dataset.size = fav.size || '1x1';
         widget.setAttribute('draggable', 'true');
 
+        // Helper to find recipe for details
+        const recipe = (typeof recipes !== 'undefined' ? recipes : []).find(r => r.id === fav.id)
+            || (AppState.customRecipes || []).find(r => r.id === fav.id);
+
+        let metaHtml = `<span>${fav.meta || fav.type}</span>`;
+        let descHtml = '';
+
+        if (fav.size === '2x1') {
+            // 2x1: Emoji + Title + Time Badge + Category Badge
+            if (recipe) {
+                const time = recipe.totalTime || recipe.prepTime;
+                let badges = [];
+
+                // 1. Time Badge
+                if (time) {
+                    badges.push(`<span style="background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:12px;">⏱ ${time}</span>`);
+                }
+
+                // 2. Category Badge (recipe.category preferred)
+                if (recipe && recipe.category) {
+                    // Capitalize first letter
+                    const cat = recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1);
+                    badges.push(`<span style="background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:12px;">🏷 ${cat}</span>`);
+                } else if (fav.type) {
+                    badges.push(`<span style="background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:12px;">🏷 ${fav.type}</span>`);
+                }
+
+                // If no time, maybe show calories? Stick to request for now.
+                if (badges.length === 0 && recipe.calories) {
+                    badges.push(`<span style="background:rgba(0,0,0,0.06); padding:2px 8px; border-radius:12px;">🔥 ${recipe.calories}</span>`);
+                }
+
+                metaHtml = badges.join(' ');
+            }
+        } else if (fav.size === '2x2') {
+            // 2x2: Rich Description + Meta
+            if (recipe) {
+                const cal = recipe.calories ? `<span>${recipe.calories}</span>` : '';
+                const time = recipe.totalTime || recipe.prepTime ? `<span>${recipe.totalTime || recipe.prepTime}</span>` : '';
+                metaHtml = `${time} ${cal} <span>${fav.type}</span>`;
+
+                // Truncate description to ~100 chars
+                const cleanDesc = (recipe.description || '').replace(/^#+\s/g, ''); // remove md headers
+                descHtml = `<div class="favorite-desc" style="font-size:0.85rem; opacity:0.8; margin-bottom:8px; line-height:1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">${cleanDesc}</div>`;
+            }
+        }
+
         // Content
         widget.innerHTML = `
             <div class="resize-handle"></div>
@@ -281,8 +328,9 @@ function renderFavorites() {
             <div class="favorite-icon">${fav.icon || '📌'}</div>
             <div class="favorite-content">
                 <div class="favorite-title">${fav.name}</div>
+                ${descHtml}
                 <div class="favorite-meta">
-                    <span>${fav.meta || fav.type}</span>
+                    ${metaHtml}
                 </div>
             </div>
         `;
