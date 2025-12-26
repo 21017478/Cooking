@@ -2,14 +2,15 @@
     "name": "VacuPrep - Meal Prep Companion",
     "short_name": "VacuPrep",
     "description": "Your personal vacuum sealing companion with recipes and tips",
-    "start_url": "/index.html",
+    "start_url": "./index.html",
+    "scope": "./",
     "display": "standalone",
     "background_color": "#0a0a0a",
     "theme_color": "#0a0a0a",
     "orientation": "portrait-primary",
     "icons": [
         {
-            "src": "icon.png",
+            "src": "./icon.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
