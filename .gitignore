@@ -1,0 +1,17 @@
+# SSH deploy keys
+vacuprep_deploy
+vacuprep_deploy.pub
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Archive
+archive/
+
+# OS files
+.DS_Store
+Thumbs.db

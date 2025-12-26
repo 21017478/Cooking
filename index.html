@@ -1161,6 +1161,294 @@
         }
 
         /* ==========================================
+           PLANNER SECTION
+           ========================================== */
+        .planner-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .week-planner {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .day-card {
+            background: var(--bg-surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-elevated);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .day-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .day-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .add-meal-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .day-meals {
+            padding: 0.75rem;
+            min-height: 60px;
+        }
+
+        .day-empty {
+            color: var(--text-muted);
+            font-style: italic;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .meal-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .meal-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .meal-icon {
+            font-size: 1.25rem;
+        }
+
+        .meal-info {
+            flex: 1;
+        }
+
+        .meal-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .meal-servings {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .meal-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+        }
+
+        /* ==========================================
+           SHOPPING SECTION
+           ========================================== */
+        .shopping-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .shopping-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .shopping-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        .shopping-empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .shopping-item.checked {
+            opacity: 0.6;
+        }
+
+        .shopping-item.checked .shopping-item-name {
+            text-decoration: line-through;
+        }
+
+        .shopping-checkbox {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .shopping-item.checked .shopping-checkbox {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .shopping-item-info {
+            flex: 1;
+        }
+
+        .shopping-item-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .shopping-item-qty {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .shopping-item-edit {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .shopping-item-delete {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        /* ==========================================
+           SUGGEST SECTION
+           ========================================== */
+        .suggest-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 500px) {
+            .suggest-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .suggest-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .suggest-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .suggest-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .suggest-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .suggest-btn {
+            width: 100%;
+        }
+
+        .suggest-result {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .suggest-result h3 {
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .suggest-result-content {
+            margin-bottom: 1rem;
+        }
+
+        .suggest-result-recipe {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+        }
+
+        .suggest-result-recipe .recipe-emoji {
+            font-size: 2rem;
+        }
+
+        .suggest-result-recipe .recipe-info h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .suggest-result-recipe .recipe-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .suggest-result-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* ==========================================
            UTILITY CLASSES
            ========================================== */
         .hidden {
@@ -1188,8 +1476,10 @@
             <nav class="desktop-nav">
                 <button class="desktop-nav-btn active" data-section="favorites">⭐ Favorites</button>
                 <button class="desktop-nav-btn" data-section="recipes">🍽️ Recipes</button>
+                <button class="desktop-nav-btn" data-section="planner">📅 Planner</button>
+                <button class="desktop-nav-btn" data-section="shopping">🛒 Shopping</button>
+                <button class="desktop-nav-btn" data-section="suggest">🎲 Suggest</button>
                 <button class="desktop-nav-btn" data-section="guides">💡 Guides</button>
-                <button class="desktop-nav-btn" data-section="about">ℹ️ About</button>
             </nav>
             <div class="header-actions">
                 <button class="header-btn" id="theme-toggle" title="Toggle theme">🌙</button>
@@ -1464,6 +1754,94 @@
                 </div>
             </div>
         </section>
+
+        <!-- PLANNER SECTION -->
+        <section id="planner" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">📅 Weekly Planner</h2>
+                    <p class="section-subtitle">Plan your family's meals for the week</p>
+                </div>
+                <div class="planner-actions">
+                    <button class="btn-secondary" id="clearWeekBtn">Clear Week</button>
+                    <button class="btn-primary" id="generateListBtn">📋 Generate Shopping List</button>
+                </div>
+                <div id="week-planner" class="week-planner">
+                    <!-- Days rendered dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- SHOPPING SECTION -->
+        <section id="shopping" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">🛒 Shopping List</h2>
+                    <p class="section-subtitle">Everything you need for the week</p>
+                </div>
+                <div class="shopping-actions">
+                    <button class="btn-secondary" id="addShoppingItemBtn">+ Add Item</button>
+                    <button class="btn-secondary" id="clearCheckedBtn">Clear Checked</button>
+                </div>
+                <div id="shopping-list" class="shopping-list">
+                    <div class="shopping-empty">
+                        <div class="shopping-empty-icon">🛒</div>
+                        <h3>No items yet</h3>
+                        <p>Add meals to your planner and generate a shopping list, or add items manually.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUGGEST SECTION -->
+        <section id="suggest" class="section">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">🎲 What's for Dinner?</h2>
+                    <p class="section-subtitle">Not sure what to make? Let us help!</p>
+                </div>
+
+                <div class="suggest-cards">
+                    <div class="suggest-card" id="suggestFavorites">
+                        <div class="suggest-card-icon">⭐</div>
+                        <h3>Family Favorites</h3>
+                        <p>Pick from recipes you already love</p>
+                        <button class="btn-primary suggest-btn" data-type="favorites">Show Me</button>
+                    </div>
+
+                    <div class="suggest-card" id="suggestQuick">
+                        <div class="suggest-card-icon">⚡</div>
+                        <h3>Quick Meals</h3>
+                        <p>Ready in 30 minutes or less</p>
+                        <button class="btn-primary suggest-btn" data-type="quick">Show Me</button>
+                    </div>
+
+                    <div class="suggest-card" id="suggestRandom">
+                        <div class="suggest-card-icon">🎲</div>
+                        <h3>Surprise Me!</h3>
+                        <p>Random pick from all recipes</p>
+                        <button class="btn-primary suggest-btn" data-type="random">Show Me</button>
+                    </div>
+
+                    <div class="suggest-card" id="suggestWeek">
+                        <div class="suggest-card-icon">📅</div>
+                        <h3>Plan My Week</h3>
+                        <p>Auto-fill your weekly planner</p>
+                        <button class="btn-primary suggest-btn" data-type="week">Fill Week</button>
+                    </div>
+                </div>
+
+                <div id="suggest-result" class="suggest-result hidden">
+                    <h3 id="suggest-result-title">Suggested Recipe</h3>
+                    <div id="suggest-result-content"></div>
+                    <div class="suggest-result-actions">
+                        <button class="btn-secondary" id="suggestAgainBtn">Try Another</button>
+                        <button class="btn-primary" id="addToPlannerBtn">Add to Planner</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Bottom Navigation (Mobile) -->
@@ -1477,13 +1855,17 @@
                 <span class="bottom-nav-icon">🍽️</span>
                 <span>Recipes</span>
             </button>
-            <button class="bottom-nav-btn" data-section="guides">
-                <span class="bottom-nav-icon">💡</span>
-                <span>Guides</span>
+            <button class="bottom-nav-btn" data-section="planner">
+                <span class="bottom-nav-icon">📅</span>
+                <span>Planner</span>
             </button>
-            <button class="bottom-nav-btn" data-section="about">
-                <span class="bottom-nav-icon">ℹ️</span>
-                <span>About</span>
+            <button class="bottom-nav-btn" data-section="shopping">
+                <span class="bottom-nav-icon">🛒</span>
+                <span>Shopping</span>
+            </button>
+            <button class="bottom-nav-btn" data-section="suggest">
+                <span class="bottom-nav-icon">🎲</span>
+                <span>Suggest</span>
             </button>
         </div>
     </nav>

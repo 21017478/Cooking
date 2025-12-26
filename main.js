@@ -15,12 +15,16 @@ const AppState = {
     notes: {},
     customRecipes: [],
     hiddenRecipes: [],
+    weekPlan: {},
+    shoppingList: [],
     theme: 'dark',
     activeSection: 'favorites',
     searchQuery: '',
     editingRecipeId: null,
     deletingRecipeId: null,
-    hidingRecipeId: null
+    hidingRecipeId: null,
+    currentSuggestion: null,
+    suggestType: null
 };
 
 // ==========================================
@@ -32,6 +36,8 @@ function initializeApp() {
     loadTheme();
     loadCustomRecipes();
     loadHiddenRecipes();
+    loadWeekPlan();
+    loadShoppingList();
     renderRecipeCards();
     renderFavorites();
     setupNavigation();
@@ -42,6 +48,9 @@ function initializeApp() {
     setupFavoriteReordering();
     setupThemeToggle();
     setupRecipeForm();
+    setupPlanner();
+    setupShopping();
+    setupSuggest();
 }
 
 // ==========================================
@@ -1097,4 +1106,515 @@ function parseRecipeText(text) {
     }
 
     return recipe;
+}
+
+// ==========================================
+// WEEK PLANNER SYSTEM
+// ==========================================
+function loadWeekPlan() {
+    try {
+        const stored = localStorage.getItem('vacuprep_week_plan');
+        AppState.weekPlan = stored ? JSON.parse(stored) : {};
+    } catch (e) {
+        AppState.weekPlan = {};
+    }
+}
+
+function saveWeekPlan() {
+    localStorage.setItem('vacuprep_week_plan', JSON.stringify(AppState.weekPlan));
+}
+
+function getWeekDates() {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+
+    const days = [];
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        days.push({
+            name: dayNames[i],
+            dateKey: date.toISOString().split('T')[0],
+            dateDisplay: date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+        });
+    }
+    return days;
+}
+
+function renderWeekPlanner() {
+    const container = document.getElementById('week-planner');
+    if (!container) return;
+
+    const days = getWeekDates();
+    container.innerHTML = days.map(day => {
+        const meals = AppState.weekPlan[day.dateKey] || [];
+        const mealsHtml = meals.length > 0
+            ? meals.map((meal, idx) => `
+                <div class="meal-item">
+                    <span class="meal-icon">${meal.icon || '🍽️'}</span>
+                    <div class="meal-info">
+                        <div class="meal-name">${meal.name}</div>
+                        <div class="meal-servings">${meal.servings} servings</div>
+                    </div>
+                    <button class="meal-remove" data-day="${day.dateKey}" data-idx="${idx}">✕</button>
+                </div>
+            `).join('')
+            : `<div class="day-empty">No meals planned</div>`;
+
+        return `
+            <div class="day-card" data-date="${day.dateKey}">
+                <div class="day-header">
+                    <div>
+                        <span class="day-name">${day.name}</span>
+                        <span class="day-date">${day.dateDisplay}</span>
+                    </div>
+                    <button class="add-meal-btn" data-day="${day.dateKey}">+ Add</button>
+                </div>
+                <div class="day-meals">
+                    ${mealsHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // Event listeners for add/remove
+    container.querySelectorAll('.add-meal-btn').forEach(btn => {
+        btn.addEventListener('click', () => openAddMealModal(btn.dataset.day));
+    });
+
+    container.querySelectorAll('.meal-remove').forEach(btn => {
+        btn.addEventListener('click', () => removeMealFromDay(btn.dataset.day, parseInt(btn.dataset.idx)));
+    });
+}
+
+function addMealToDay(dateKey, recipe, servings = 4) {
+    if (!AppState.weekPlan[dateKey]) {
+        AppState.weekPlan[dateKey] = [];
+    }
+    AppState.weekPlan[dateKey].push({
+        recipeId: recipe.id || recipe.name,
+        name: recipe.name,
+        icon: recipe.image || '🍽️',
+        servings: servings,
+        ingredients: recipe.ingredients || []
+    });
+    saveWeekPlan();
+    renderWeekPlanner();
+}
+
+function removeMealFromDay(dateKey, index) {
+    if (AppState.weekPlan[dateKey]) {
+        AppState.weekPlan[dateKey].splice(index, 1);
+        if (AppState.weekPlan[dateKey].length === 0) {
+            delete AppState.weekPlan[dateKey];
+        }
+        saveWeekPlan();
+        renderWeekPlanner();
+    }
+}
+
+function clearWeekPlan() {
+    AppState.weekPlan = {};
+    saveWeekPlan();
+    renderWeekPlanner();
+}
+
+function openAddMealModal(dateKey) {
+    // Simple prompt for now - could be enhanced with a proper modal
+    const allRecipes = [
+        ...(typeof recipes !== 'undefined' ? recipes : []),
+        ...AppState.customRecipes
+    ].filter(r => !AppState.hiddenRecipes.includes(r.id));
+
+    // Create a quick-select modal
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.id = 'addMealModal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Meal</h2>
+                <button class="modal-close" id="addMealClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Servings</label>
+                    <select id="mealServings" class="form-input">
+                        <option value="2">2 servings</option>
+                        <option value="4" selected>4 servings</option>
+                        <option value="6">6 servings</option>
+                        <option value="8">8 servings</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Recipe</label>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${allRecipes.map(r => `
+                            <div class="meal-select-item" data-recipe-id="${r.id}" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-elevated);border-radius:8px;margin-bottom:0.5rem;cursor:pointer;">
+                                <span style="font-size:1.5rem;">${r.image || '🍽️'}</span>
+                                <span>${r.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    // Close handlers
+    modal.querySelector('#addMealClose').addEventListener('click', () => {
+        modal.remove();
+        document.body.style.overflow = '';
+    });
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+            document.body.style.overflow = '';
+        }
+    });
+
+    // Recipe selection
+    modal.querySelectorAll('.meal-select-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const recipeId = item.dataset.recipeId;
+            const recipe = allRecipes.find(r => r.id === recipeId);
+            const servings = parseInt(document.getElementById('mealServings').value);
+            if (recipe) {
+                addMealToDay(dateKey, recipe, servings);
+            }
+            modal.remove();
+            document.body.style.overflow = '';
+        });
+    });
+}
+
+function setupPlanner() {
+    renderWeekPlanner();
+
+    const clearBtn = document.getElementById('clearWeekBtn');
+    const generateBtn = document.getElementById('generateListBtn');
+
+    clearBtn?.addEventListener('click', () => {
+        if (confirm('Clear all meals from this week?')) {
+            clearWeekPlan();
+        }
+    });
+
+    generateBtn?.addEventListener('click', () => {
+        generateShoppingList();
+        // Navigate to shopping section
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('shopping')?.classList.add('active');
+        document.querySelectorAll('[data-section]').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('[data-section="shopping"]').forEach(b => b.classList.add('active'));
+    });
+}
+
+// ==========================================
+// SHOPPING LIST SYSTEM
+// ==========================================
+function loadShoppingList() {
+    try {
+        const stored = localStorage.getItem('vacuprep_shopping_list');
+        AppState.shoppingList = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        AppState.shoppingList = [];
+    }
+}
+
+function saveShoppingList() {
+    localStorage.setItem('vacuprep_shopping_list', JSON.stringify(AppState.shoppingList));
+}
+
+function renderShoppingList() {
+    const container = document.getElementById('shopping-list');
+    if (!container) return;
+
+    if (AppState.shoppingList.length === 0) {
+        container.innerHTML = `
+            <div class="shopping-empty">
+                <div class="shopping-empty-icon">🛒</div>
+                <h3>No items yet</h3>
+                <p>Add meals to your planner and generate a shopping list, or add items manually.</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = AppState.shoppingList.map((item, idx) => `
+        <div class="shopping-item ${item.checked ? 'checked' : ''}" data-idx="${idx}">
+            <div class="shopping-checkbox" data-idx="${idx}">${item.checked ? '✓' : ''}</div>
+            <div class="shopping-item-info">
+                <div class="shopping-item-name">${item.name}</div>
+                <div class="shopping-item-qty">${item.qty}</div>
+            </div>
+            <button class="shopping-item-edit" data-idx="${idx}">✏️</button>
+            <button class="shopping-item-delete" data-idx="${idx}">🗑️</button>
+        </div>
+    `).join('');
+
+    // Event listeners
+    container.querySelectorAll('.shopping-checkbox').forEach(cb => {
+        cb.addEventListener('click', () => toggleShoppingItem(parseInt(cb.dataset.idx)));
+    });
+
+    container.querySelectorAll('.shopping-item-edit').forEach(btn => {
+        btn.addEventListener('click', () => editShoppingItem(parseInt(btn.dataset.idx)));
+    });
+
+    container.querySelectorAll('.shopping-item-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteShoppingItem(parseInt(btn.dataset.idx)));
+    });
+}
+
+function generateShoppingList() {
+    const itemsMap = new Map();
+
+    // Collect all ingredients from week plan
+    Object.values(AppState.weekPlan).forEach(dayMeals => {
+        dayMeals.forEach(meal => {
+            const multiplier = meal.servings / 4; // Assume base recipe is 4 servings
+            (meal.ingredients || []).forEach(ing => {
+                const normalized = ing.toLowerCase().trim();
+                if (itemsMap.has(normalized)) {
+                    // Already exists, just note we found another
+                    const existing = itemsMap.get(normalized);
+                    existing.count = (existing.count || 1) + 1;
+                } else {
+                    itemsMap.set(normalized, { name: ing, qty: 'as needed', checked: false });
+                }
+            });
+        });
+    });
+
+    // Convert to array
+    AppState.shoppingList = Array.from(itemsMap.values());
+    saveShoppingList();
+    renderShoppingList();
+}
+
+function addShoppingItem(name, qty = '') {
+    AppState.shoppingList.push({
+        name: name,
+        qty: qty || 'as needed',
+        checked: false,
+        isCustom: true
+    });
+    saveShoppingList();
+    renderShoppingList();
+}
+
+function toggleShoppingItem(index) {
+    if (AppState.shoppingList[index]) {
+        AppState.shoppingList[index].checked = !AppState.shoppingList[index].checked;
+        saveShoppingList();
+        renderShoppingList();
+    }
+}
+
+function editShoppingItem(index) {
+    const item = AppState.shoppingList[index];
+    if (!item) return;
+
+    const newName = prompt('Item name:', item.name);
+    if (newName === null) return;
+
+    const newQty = prompt('Quantity:', item.qty);
+    if (newQty === null) return;
+
+    item.name = newName || item.name;
+    item.qty = newQty || item.qty;
+    saveShoppingList();
+    renderShoppingList();
+}
+
+function deleteShoppingItem(index) {
+    AppState.shoppingList.splice(index, 1);
+    saveShoppingList();
+    renderShoppingList();
+}
+
+function clearCheckedItems() {
+    AppState.shoppingList = AppState.shoppingList.filter(item => !item.checked);
+    saveShoppingList();
+    renderShoppingList();
+}
+
+function setupShopping() {
+    renderShoppingList();
+
+    const addBtn = document.getElementById('addShoppingItemBtn');
+    const clearBtn = document.getElementById('clearCheckedBtn');
+
+    addBtn?.addEventListener('click', () => {
+        const name = prompt('Item name:');
+        if (name) {
+            const qty = prompt('Quantity (optional):');
+            addShoppingItem(name, qty);
+        }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+        clearCheckedItems();
+    });
+}
+
+// ==========================================
+// SUGGEST SYSTEM
+// ==========================================
+function getAllAvailableRecipes() {
+    return [
+        ...(typeof recipes !== 'undefined' ? recipes : []),
+        ...AppState.customRecipes
+    ].filter(r => !AppState.hiddenRecipes.includes(r.id));
+}
+
+function getFavoriteRecipes() {
+    const favIds = AppState.favorites.filter(f => f.type === 'recipe').map(f => f.id);
+    const allRecipes = getAllAvailableRecipes();
+    return allRecipes.filter(r => favIds.includes(r.id) || favIds.includes(r.name));
+}
+
+function getQuickRecipes() {
+    const allRecipes = getAllAvailableRecipes();
+    return allRecipes.filter(r => {
+        const prep = r.prepTime || '';
+        const match = prep.match(/(\d+)/);
+        if (match) {
+            return parseInt(match[1]) <= 30;
+        }
+        return false;
+    });
+}
+
+function pickRandomRecipe(recipeList) {
+    if (recipeList.length === 0) return null;
+    return recipeList[Math.floor(Math.random() * recipeList.length)];
+}
+
+function displaySuggestion(recipe, title = 'Suggested Recipe') {
+    if (!recipe) {
+        AppState.currentSuggestion = null;
+        return;
+    }
+
+    AppState.currentSuggestion = recipe;
+
+    const resultDiv = document.getElementById('suggest-result');
+    const titleEl = document.getElementById('suggest-result-title');
+    const contentEl = document.getElementById('suggest-result-content');
+
+    if (!resultDiv) return;
+
+    titleEl.textContent = title;
+    contentEl.innerHTML = `
+        <div class="suggest-result-recipe">
+            <span class="recipe-emoji">${recipe.image || '🍽️'}</span>
+            <div class="recipe-info">
+                <h4>${recipe.name}</h4>
+                <div class="recipe-meta">
+                    ${recipe.category || 'Meal'} • ${recipe.prepTime || 'Varies'}
+                </div>
+            </div>
+        </div>
+    `;
+    resultDiv.classList.remove('hidden');
+}
+
+function fillWeekWithSuggestions() {
+    const allRecipes = getAllAvailableRecipes();
+    const favorites = getFavoriteRecipes();
+    const days = getWeekDates();
+
+    // Clear current week
+    AppState.weekPlan = {};
+
+    // Fill each day - prioritize favorites
+    days.forEach((day, idx) => {
+        // 60% chance of favorite if available, otherwise random
+        let recipe;
+        if (favorites.length > 0 && Math.random() < 0.6) {
+            recipe = pickRandomRecipe(favorites);
+        } else {
+            recipe = pickRandomRecipe(allRecipes);
+        }
+
+        if (recipe) {
+            addMealToDay(day.dateKey, recipe, 4);
+        }
+    });
+
+    // Navigate to planner
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('planner')?.classList.add('active');
+    document.querySelectorAll('[data-section]').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('[data-section="planner"]').forEach(b => b.classList.add('active'));
+}
+
+function setupSuggest() {
+    document.querySelectorAll('.suggest-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            AppState.suggestType = type;
+
+            let recipeList = [];
+            let title = 'Suggested Recipe';
+
+            switch (type) {
+                case 'favorites':
+                    recipeList = getFavoriteRecipes();
+                    title = '⭐ From Your Favorites';
+                    if (recipeList.length === 0) {
+                        recipeList = getAllAvailableRecipes();
+                        title = 'Try adding some favorites first! Here\'s a random pick:';
+                    }
+                    displaySuggestion(pickRandomRecipe(recipeList), title);
+                    break;
+
+                case 'quick':
+                    recipeList = getQuickRecipes();
+                    title = '⚡ Quick Meal';
+                    if (recipeList.length === 0) {
+                        recipeList = getAllAvailableRecipes();
+                        title = 'Quick meal (all recipes):';
+                    }
+                    displaySuggestion(pickRandomRecipe(recipeList), title);
+                    break;
+
+                case 'random':
+                    recipeList = getAllAvailableRecipes();
+                    title = '🎲 Random Pick';
+                    displaySuggestion(pickRandomRecipe(recipeList), title);
+                    break;
+
+                case 'week':
+                    fillWeekWithSuggestions();
+                    return;
+            }
+        });
+    });
+
+    document.getElementById('suggestAgainBtn')?.addEventListener('click', () => {
+        // Re-trigger the same type
+        const type = AppState.suggestType;
+        if (type) {
+            document.querySelector(`.suggest-btn[data-type="${type}"]`)?.click();
+        }
+    });
+
+    document.getElementById('addToPlannerBtn')?.addEventListener('click', () => {
+        if (AppState.currentSuggestion) {
+            // Add to today or let user pick day
+            const days = getWeekDates();
+            const today = new Date().toISOString().split('T')[0];
+            addMealToDay(today, AppState.currentSuggestion, 4);
+            alert(`Added "${AppState.currentSuggestion.name}" to today's plan!`);
+        }
+    });
 }
