@@ -1556,53 +1556,161 @@
         /* ==========================================
            FAVORITES GRID (2x2)
            ========================================== */
+        /* ==========================================
+           FAVORITES WIDGET SYSTEM
+           ========================================== */
         .favorites-list {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            /* Fix for content overflow */
-            gap: 0.5rem;
+            grid-template-columns: repeat(2, 1fr);
+            /* Default 2 columns */
+            grid-auto-rows: 100px;
+            /* Fixed row height for widgets */
+            gap: 0.75rem;
+            grid-auto-flow: dense;
+            /* Fill gaps efficiently */
         }
 
-        @media (max-width: 500px) {
+        /* Widget Sizes */
+        .favorite-item[data-size="1x1"] {
+            grid-column: span 1;
+            grid-row: span 1;
+        }
 
-            /* Already covered by the rule above, but keeping for safety */
-            .favorites-list {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+        .favorite-item[data-size="2x1"] {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .favorite-item[data-size="2x2"] {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        .favorite-item {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0.5rem;
+            background: var(--bg-surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            user-select: none;
+            /* Prevent text selection during drag */
+            touch-action: manipulation;
+            /* Improve touch response */
+        }
+
+        /* Clean Mode (Default) - Look like App Icons */
+        .favorite-item:hover {
+            transform: translateY(-2px);
+            background: var(--bg-elevated);
+        }
+
+        .favorite-actions {
+            display: none;
+            /* Hidden by default */
+        }
+
+        /* EDIT MODE STYLES */
+        .favorites-list.editing .favorite-item {
+            animation: jiggle 0.3s infinite alternate;
+            border-color: var(--primary-color);
+            background: var(--bg-elevated);
+            cursor: move;
+        }
+
+        .favorites-list.editing .favorite-actions {
+            display: flex;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            gap: 4px;
+            z-index: 10;
+        }
+
+        /* Action Buttons (Tiny Circles) */
+        .widget-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-resize {
+            background: #3b82f6;
+        }
+
+        /* Blue for Resize */
+        .btn-delete {
+            background: #ff4d4d;
+        }
+
+        /* Red for Delete */
+
+        /* Jiggle Animation */
+        @keyframes jiggle {
+            0% {
+                transform: rotate(-1deg);
+            }
+
+            100% {
+                transform: rotate(1deg);
             }
         }
 
-        /* Ensure items stretch */
-        .favorite-item {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding: 0.5rem;
-            /* Reduced padding for mobile */
-            overflow: hidden;
-            /* Contain content */
-            min-width: 0;
-            /* Enable flex shrinking */
+        /* Done Button (appears in header when editing) */
+        #editModeControls {
+            display: none;
         }
 
+        .editing-active #editModeControls {
+            display: inline-block;
+        }
+
+        /* Content Styling */
         .favorite-content {
-            flex: 1;
-            min-width: 0;
-            /* Crucial for text truncation in flex child */
-            margin: 0 0.5rem;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .favorite-icon {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
         }
 
         .favorite-title {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            line-height: 1.2;
         }
 
         .favorite-meta {
-            font-size: 0.75rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        /* 2x1 Specific Layout (Side-by-side) */
+        .favorite-item[data-size="2x1"] {
+            flex-direction: row;
+            text-align: left;
+            padding: 0 1rem;
+            gap: 0.75rem;
+        }
+
+        .favorite-item[data-size="2x1"] .favorite-icon {
+            margin-bottom: 0;
         }
 
         /* ==========================================
