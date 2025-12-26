@@ -1995,3 +1995,121 @@ function exportAllData() {
     a.click();
     URL.revokeObjectURL(url);
 }
+
+// ==========================================
+// SUGGEST SYSTEM
+// ==========================================
+function setupSuggest() {
+    document.querySelectorAll('.suggest-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.dataset.type;
+            if (!type) return;
+
+            let recipeList = [];
+            let label = 'Suggestion';
+            const allRecipes = [...(typeof recipes !== 'undefined' ? recipes : []), ...(AppState.customRecipes || [])];
+
+            if (type === 'random') {
+                recipeList = allRecipes;
+                label = 'Random Pick';
+            } else if (type === 'quick') {
+                recipeList = allRecipes.filter(r => {
+                    const time = r.totalTime || r.prepTime || '';
+                    const mins = parseInt(time);
+                    return !isNaN(mins) && mins <= 30;
+                });
+                label = 'Quick Meal';
+            } else if (type === 'favorites') {
+                if (AppState.favorites.length === 0) {
+                    showToast('No favorites yet!');
+                    return;
+                }
+                recipeList = AppState.favorites.map(fav => allRecipes.find(r => r.id === fav.id) || fav);
+                label = 'Family Favorite';
+            } else if (type === 'week') {
+                showToast('Week planner coming soon!');
+                return;
+            }
+
+            if (recipeList.length === 0) {
+                showToast('No recipes found!');
+                return;
+            }
+
+            const randomRecipe = recipeList[Math.floor(Math.random() * recipeList.length)];
+            showSuggestResult(randomRecipe, label);
+        });
+    });
+}
+
+function showSuggestResult(recipe, label) {
+    const existing = document.getElementById('suggest-result-popup');
+    if (existing) existing.remove();
+
+    const popup = document.createElement('div');
+    popup.id = 'suggest-result-popup';
+    popup.style.cssText = `
+        position: fixed;
+        top: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 32px);
+        max-width: 400px;
+        background: var(--card-bg, #2a2a3e);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        z-index: 2000;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        animation: slideDown 0.3s ease-out;
+        cursor: pointer;
+    `;
+
+    const icon = recipe.image || '🍽️';
+    const name = recipe.name || 'Recipe';
+    const time = recipe.totalTime || recipe.prepTime || '';
+    const category = recipe.category ? recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1) : '';
+
+    popup.innerHTML = `
+        <div style="font-size: 2.5rem;">${icon}</div>
+        <div style="flex: 1;">
+            <div style="font-size: 0.75rem; opacity: 0.7; margin-bottom: 4px;">${label}</div>
+            <div style="font-weight: 600; font-size: 1rem;">${name}</div>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                ${time ? `<span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">⏱ ${time}</span>` : ''}
+                ${category ? `<span style="background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">🏷 ${category}</span>` : ''}
+            </div>
+        </div>
+        <button style="background: none; border: none; font-size: 1.5rem; cursor: pointer; opacity: 0.7; color: inherit;" id="close-suggest-result">×</button>
+    `;
+
+    if (!document.getElementById('suggest-animations')) {
+        const style = document.createElement('style');
+        style.id = 'suggest-animations';
+        style.textContent = `@keyframes slideDown { from { transform: translateX(-50%) translateY(-100%); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }`;
+        document.head.appendChild(style);
+    }
+
+    document.body.appendChild(popup);
+
+    popup.addEventListener('click', (e) => {
+        if (e.target.id !== 'close-suggest-result') {
+            showRecipeDetail(recipe.id);
+            popup.remove();
+        }
+    });
+
+    document.getElementById('close-suggest-result').addEventListener('click', (e) => {
+        e.stopPropagation();
+        popup.remove();
+    });
+
+    setTimeout(() => {
+        if (document.getElementById('suggest-result-popup')) {
+            popup.remove();
+        }
+    }, 10000);
+}
+
