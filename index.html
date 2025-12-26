@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description"
         content="Your personal vacuum sealing companion - recipes, tips, and food preservation guides">
-    <title>VacuPrep - Your Meal Prep Companion</title>
+    <title>Cook! - Your Meal Prep Companion</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
+
+
 
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -1550,6 +1552,68 @@
             background: var(--bg-surface);
             color: var(--text-primary);
         }
+
+        /* ==========================================
+           FAVORITES GRID (2x2)
+           ========================================== */
+        .favorites-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            /* Reduced gap */
+        }
+
+        /* Ensure items stretch */
+        .favorite-item {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            /* Compact padding */
+        }
+
+        /* ==========================================
+           SUGGEST SECTION
+           ========================================== */
+        .suggest-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Force 2x2 on mobile too for compactness */
+        @media (max-width: 500px) {
+            .suggest-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .suggest-card {
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .suggest-card:hover {
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+
+        .suggest-card h3 {
+            font-size: 0.95rem;
+            /* Slightly smaller */
+        }
+
+        .suggest-card p {
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .suggest-card-icon {
+            font-size: 2rem;
+            /* Smaller icon */
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 
@@ -1559,7 +1623,7 @@
         <div class="header-content">
             <div class="logo">
                 <span class="logo-icon">🔒</span>
-                <span>VacuPrep</span>
+                <span>Cook!</span>
             </div>
             <nav class="desktop-nav">
                 <button class="desktop-nav-btn active" data-section="favorites">⭐ Favorites</button>
@@ -1890,37 +1954,8 @@
                     <p class="section-subtitle">Not sure what to make? Let us help!</p>
                 </div>
 
-                <div class="suggest-cards">
-                    <div class="suggest-card" id="suggestFavorites">
-                        <div class="suggest-card-icon">⭐</div>
-                        <h3>Family Favorites</h3>
-                        <p>Pick from recipes you already love</p>
-                        <button class="btn-primary suggest-btn" data-type="favorites">Show Me</button>
-                    </div>
-
-                    <div class="suggest-card" id="suggestQuick">
-                        <div class="suggest-card-icon">⚡</div>
-                        <h3>Quick Meals</h3>
-                        <p>Ready in 30 minutes or less</p>
-                        <button class="btn-primary suggest-btn" data-type="quick">Show Me</button>
-                    </div>
-
-                    <div class="suggest-card" id="suggestRandom">
-                        <div class="suggest-card-icon">🎲</div>
-                        <h3>Surprise Me!</h3>
-                        <p>Random pick from all recipes</p>
-                        <button class="btn-primary suggest-btn" data-type="random">Show Me</button>
-                    </div>
-
-                    <div class="suggest-card" id="suggestWeek">
-                        <div class="suggest-card-icon">📅</div>
-                        <h3>Plan My Week</h3>
-                        <p>Auto-fill your weekly planner</p>
-                        <button class="btn-primary suggest-btn" data-type="week">Fill Week</button>
-                    </div>
-                </div>
-
-                <div id="suggest-result" class="suggest-result hidden">
+                <!-- Result Box Moved to Top -->
+                <div id="suggest-result" class="suggest-result hidden" style="margin-bottom: 1.5rem;">
                     <h3 id="suggest-result-title">Suggested Recipe</h3>
                     <div id="suggest-result-content"></div>
                     <div class="suggest-result-actions">
@@ -1928,8 +1963,35 @@
                         <button class="btn-primary" id="addToPlannerBtn">Add to Planner</button>
                     </div>
                 </div>
+
+                <div class="suggest-cards">
+                    <div class="suggest-card" id="suggestFavorites" data-type="favorites">
+                        <div class="suggest-card-icon">⭐</div>
+                        <h3>Family Favorites</h3>
+                        <p>Pick from recipes you already love</p>
+                    </div>
+
+                    <div class="suggest-card" id="suggestQuick" data-type="quick">
+                        <div class="suggest-card-icon">⚡</div>
+                        <h3>Quick Meals</h3>
+                        <p>Ready in 30 minutes or less</p>
+                    </div>
+
+                    <div class="suggest-card" id="suggestRandom" data-type="random">
+                        <div class="suggest-card-icon">🎲</div>
+                        <h3>Surprise Me!</h3>
+                        <p>Random pick from all recipes</p>
+                    </div>
+
+                    <div class="suggest-card" id="suggestWeek" data-type="week">
+                        <div class="suggest-card-icon">📅</div>
+                        <h3>Plan My Week</h3>
+                        <p>Auto-fill your weekly planner</p>
+                    </div>
+                </div>
             </div>
         </section>
+
 
     </main>
 

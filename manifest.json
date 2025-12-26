@@ -1,6 +1,6 @@
 {
-    "name": "VacuPrep - Meal Prep Companion",
-    "short_name": "VacuPrep",
+    "name": "Cook! - Meal Prep Companion",
+    "short_name": "Cook!",
     "description": "Your personal vacuum sealing companion with recipes and tips",
     "start_url": "./index.html",
     "scope": "./",

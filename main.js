@@ -1593,9 +1593,11 @@ function fillWeekWithSuggestions() {
 }
 
 function setupSuggest() {
-    document.querySelectorAll('.suggest-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const type = btn.dataset.type;
+    document.querySelectorAll('.suggest-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const type = card.dataset.type;
+            if (!type) return; // Guard against non-action cards
+
             AppState.suggestType = type;
 
             let recipeList = [];
