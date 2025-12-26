@@ -1605,8 +1605,9 @@
             transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
             display: flex;
             user-select: none;
-            touch-action: none;
-            /* Crucial for drag gestures */
+            touch-action: pan-y;
+            /* FIX: Allow vertical scroll, only block gestures when strictly needed */
+            -webkit-tap-highlight-color: transparent;
         }
 
         .favorite-item:active {
@@ -1643,29 +1644,36 @@
             display: none;
         }
 
-        /* 2x1: Row Layout (Icon Left, Details Right) */
+        /* 2x1: Wide Layout (More Spacious) */
         .favorite-item[data-size="2x1"] {
             flex-direction: row;
             align-items: center;
-            padding: 16px;
+            padding: 0 24px;
+            /* More horizontal breathing room */
             text-align: left;
+            background: linear-gradient(to right, var(--bg-surface), var(--bg-elevated));
         }
 
         .favorite-item[data-size="2x1"] .favorite-icon {
-            font-size: 3rem;
-            margin-right: 16px;
+            font-size: 3.5rem;
+            /* Larger Icon */
+            margin-right: 20px;
             margin-bottom: 0;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .favorite-item[data-size="2x1"] .favorite-content {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            flex: 1;
+            min-width: 0;
         }
 
         .favorite-item[data-size="2x1"] .favorite-title {
-            font-size: 1rem;
-            margin-bottom: 4px;
+            font-size: 1.1rem;
+            /* Larger Title */
+            margin-bottom: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1673,37 +1681,70 @@
 
         .favorite-item[data-size="2x1"] .favorite-meta {
             display: flex;
-            gap: 6px;
-            font-size: 0.75rem;
+            gap: 8px;
+            font-size: 0.8rem;
             color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        /* 2x2: Rich Card Layout */
+        /* 2x2: Hero Card Layout */
         .favorite-item[data-size="2x2"] {
             flex-direction: column;
-            padding: 20px;
+            justify-content: center;
+            /* Center vertically */
+            padding: 24px;
             text-align: center;
-            background: linear-gradient(to bottom right, var(--bg-surface), var(--bg-elevated));
+            background: linear-gradient(135deg, var(--bg-surface), var(--bg-elevated));
         }
 
         .favorite-item[data-size="2x2"] .favorite-icon {
-            font-size: 4rem;
-            margin-bottom: 12px;
+            font-size: 5rem;
+            /* Huge Hero Icon */
+            margin-bottom: 16px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
+            transition: transform 0.3s ease;
+        }
+
+        .favorite-item[data-size="2x2"]:hover .favorite-icon {
+            transform: scale(1.1);
         }
 
         .favorite-item[data-size="2x2"] .favorite-title {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 12px;
         }
 
         .favorite-item[data-size="2x2"] .favorite-meta {
-            display: flex;
+            display: inline-flex;
             justify-content: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 12px;
-            border-radius: 20px;
+            background: rgba(128, 128, 128, 0.1);
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
+
+        /* Resize Handle - Needs strict touch capture */
+        .resize-handle {
+            display: none;
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            width: 44px;
+            /* Slightly larger hit target */
+            height: 44px;
+            background: linear-gradient(135deg, transparent 50%, var(--primary) 50%);
+            opacity: 0.9;
+            cursor: nwse-resize;
+            border-radius: 0 0 14px 0;
+            z-index: 20;
+            touch-action: none;
+            /* Block scrolling ONLY on the handle */
+        }
+
+
 
         /* EDIT MODE STYLES (Professional) */
         body.editing-active .favorites-list::before {
