@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function () {
 // ==========================================
 const AppState = {
     favorites: [],
-    activeSection: 'favorites'
+    notes: {},
+    theme: 'dark',
+    activeSection: 'favorites',
+    searchQuery: ''
 };
 
 // ==========================================
@@ -20,13 +23,17 @@ const AppState = {
 // ==========================================
 function initializeApp() {
     loadFavorites();
+    loadNotes();
+    loadTheme();
     renderRecipeCards();
     renderFavorites();
     setupNavigation();
     setupFiltering();
+    setupSearch();
     setupTipPinning();
     setupRecipeModal();
     setupFavoriteReordering();
+    setupThemeToggle();
 }
 
 // ==========================================
@@ -213,6 +220,7 @@ function renderRecipeCards() {
         card.className = 'recipe-card show';
         card.dataset.category = recipe.category;
         card.dataset.recipeId = recipe.id;
+        card.dataset.name = recipe.name;
 
         const isFav = isFavorite(recipe.id);
 
@@ -284,6 +292,21 @@ function updateFavoriteButtons() {
             const isFav = isFavorite(tipId);
             btn.classList.toggle('active', isFav);
         }
+    });
+}
+
+// ==========================================
+// CATEGORY FILTERING
+// ==========================================
+function setupFiltering() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update active states
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // Trigger combined filter
+            filterRecipes();
+        });
     });
 }
 
@@ -496,3 +519,130 @@ function showRecipeDetail(recipeIdentifier) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
+
+// ==========================================
+// THEME TOGGLE
+// ==========================================
+function loadTheme() {
+    try {
+        const stored = localStorage.getItem('vacuprep_theme');
+        AppState.theme = stored || 'dark';
+        applyTheme();
+    } catch (e) {
+        AppState.theme = 'dark';
+    }
+}
+
+function applyTheme() {
+    if (AppState.theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.querySelector('#theme-toggle')?.textContent && (document.querySelector('#theme-toggle').textContent = '☀️');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+        document.querySelector('#theme-toggle')?.textContent && (document.querySelector('#theme-toggle').textContent = '🌙');
+    }
+}
+
+function setupThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (!toggleBtn) return;
+
+    // Set initial icon
+    toggleBtn.textContent = AppState.theme === 'light' ? '☀️' : '🌙';
+
+    toggleBtn.addEventListener('click', () => {
+        AppState.theme = AppState.theme === 'dark' ? 'light' : 'dark';
+        localStorage.setItem('vacuprep_theme', AppState.theme);
+        applyTheme();
+    });
+}
+
+// ==========================================
+// SEARCH FUNCTIONALITY
+// ==========================================
+function setupSearch() {
+    const searchInput = document.getElementById('recipe-search');
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', (e) => {
+        AppState.searchQuery = e.target.value.toLowerCase().trim();
+        filterRecipes();
+    });
+}
+
+function filterRecipes() {
+    const cards = document.querySelectorAll('.recipe-card');
+    const query = AppState.searchQuery;
+    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+
+    cards.forEach(card => {
+        const name = (card.dataset.name || '').toLowerCase();
+        const category = card.dataset.category || '';
+        const description = (card.querySelector('.recipe-description')?.textContent || '').toLowerCase();
+
+        // Category filter
+        let matchesCategory = activeCategory === 'all' || category.includes(activeCategory);
+
+        // Search filter
+        let matchesSearch = !query ||
+            name.includes(query) ||
+            description.includes(query) ||
+            category.includes(query);
+
+        if (matchesCategory && matchesSearch) {
+            card.classList.add('show');
+        } else {
+            card.classList.remove('show');
+        }
+    });
+}
+
+// ==========================================
+// RECIPE NOTES
+// ==========================================
+function loadNotes() {
+    try {
+        const stored = localStorage.getItem('vacuprep_notes');
+        AppState.notes = stored ? JSON.parse(stored) : {};
+    } catch (e) {
+        AppState.notes = {};
+    }
+}
+
+function saveNotes() {
+    localStorage.setItem('vacuprep_notes', JSON.stringify(AppState.notes));
+}
+
+function getNote(recipeId) {
+    return AppState.notes[recipeId] || '';
+}
+
+function setNote(recipeId, note) {
+    if (note.trim()) {
+        AppState.notes[recipeId] = note.trim();
+    } else {
+        delete AppState.notes[recipeId];
+    }
+    saveNotes();
+    // Update note badges on cards
+    updateNoteBadges();
+}
+
+function updateNoteBadges() {
+    document.querySelectorAll('.recipe-card').forEach(card => {
+        const recipeId = card.dataset.name;
+        const existingBadge = card.querySelector('.recipe-note-badge');
+
+        if (AppState.notes[recipeId]) {
+            if (!existingBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'recipe-note-badge';
+                badge.textContent = '📝';
+                card.appendChild(badge);
+            }
+        } else if (existingBadge) {
+            existingBadge.remove();
+        }
+    });
+}
+
