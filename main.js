@@ -14,11 +14,13 @@ const AppState = {
     favorites: [],
     notes: {},
     customRecipes: [],
+    hiddenRecipes: [],
     theme: 'dark',
     activeSection: 'favorites',
     searchQuery: '',
     editingRecipeId: null,
-    deletingRecipeId: null
+    deletingRecipeId: null,
+    hidingRecipeId: null
 };
 
 // ==========================================
@@ -29,6 +31,7 @@ function initializeApp() {
     loadNotes();
     loadTheme();
     loadCustomRecipes();
+    loadHiddenRecipes();
     renderRecipeCards();
     renderFavorites();
     setupNavigation();
@@ -220,15 +223,18 @@ function renderRecipeCards() {
 
     grid.innerHTML = '';
 
-    // Combine built-in recipes with custom recipes
+    // Combine built-in recipes with custom recipes, filter out hidden ones
+    const builtInRecipes = (typeof recipes !== 'undefined' ? recipes : [])
+        .filter(r => !AppState.hiddenRecipes.includes(r.id));
+
     const allRecipes = [
-        ...(typeof recipes !== 'undefined' ? recipes : []),
+        ...builtInRecipes,
         ...AppState.customRecipes
     ];
 
     allRecipes.forEach(recipe => {
         const card = document.createElement('div');
-        card.className = 'recipe-card show' + (recipe.isCustom ? ' custom' : '');
+        card.className = 'recipe-card show' + (recipe.isCustom ? ' custom' : ' builtin');
         card.dataset.category = recipe.category;
         card.dataset.recipeId = recipe.id;
         card.dataset.name = recipe.name;
@@ -256,12 +262,10 @@ function renderRecipeCards() {
                 <span>⏱️ ${recipe.prepTime || 'Varies'}</span>
                 <span>❄️ ${recipe.totalTime || 'See recipe'}</span>
             </div>
-            ${recipe.isCustom ? `
-                <div class="recipe-card-actions">
-                    <button class="recipe-card-action edit" data-id="${recipe.id}" title="Edit">✏️</button>
-                    <button class="recipe-card-action delete" data-id="${recipe.id}" data-name="${recipe.name}" title="Delete">🗑️</button>
-                </div>
-            ` : ''}
+            <div class="recipe-card-actions">
+                <button class="recipe-card-action edit" data-id="${recipe.id}" data-custom="${recipe.isCustom || false}" title="Edit">✏️</button>
+                <button class="recipe-card-action delete" data-id="${recipe.id}" data-name="${recipe.name}" data-custom="${recipe.isCustom || false}" title="${recipe.isCustom ? 'Delete' : 'Hide'}">🗑️</button>
+            </div>
         `;
 
         // Click to open modal (or edit for custom)
@@ -295,18 +299,29 @@ function renderRecipeCards() {
             }
         });
 
-        // Edit button (custom recipes only)
+        // Edit button - for custom: opens form, for built-in: duplicates then opens form
         const editBtn = card.querySelector('.recipe-card-action.edit');
         editBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
-            openRecipeForm(recipe.id);
+            const isCustom = editBtn.dataset.custom === 'true';
+            if (isCustom) {
+                openRecipeForm(recipe.id);
+            } else {
+                // Duplicate built-in to custom, hide original, open form
+                editBuiltInRecipe(recipe);
+            }
         });
 
-        // Delete button (custom recipes only)
+        // Delete button - for custom: deletes, for built-in: hides (with confirmation)
         const deleteBtn = card.querySelector('.recipe-card-action.delete');
         deleteBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
-            openDeleteModal(recipe.id, recipe.name);
+            const isCustom = deleteBtn.dataset.custom === 'true';
+            if (isCustom) {
+                openDeleteModal(recipe.id, recipe.name);
+            } else {
+                openHideModal(recipe.id, recipe.name);
+            }
         });
 
         grid.appendChild(card);
@@ -746,6 +761,77 @@ function saveCustomRecipes() {
     localStorage.setItem('vacuprep_custom_recipes', JSON.stringify(AppState.customRecipes));
 }
 
+// ==========================================
+// HIDDEN RECIPES SYSTEM
+// ==========================================
+function loadHiddenRecipes() {
+    try {
+        const stored = localStorage.getItem('vacuprep_hidden_recipes');
+        AppState.hiddenRecipes = stored ? JSON.parse(stored) : [];
+    } catch (e) {
+        AppState.hiddenRecipes = [];
+    }
+}
+
+function saveHiddenRecipes() {
+    localStorage.setItem('vacuprep_hidden_recipes', JSON.stringify(AppState.hiddenRecipes));
+}
+
+function hideBuiltInRecipe(id) {
+    if (!AppState.hiddenRecipes.includes(id)) {
+        AppState.hiddenRecipes.push(id);
+        saveHiddenRecipes();
+        renderRecipeCards();
+    }
+}
+
+function unhideBuiltInRecipe(id) {
+    AppState.hiddenRecipes = AppState.hiddenRecipes.filter(r => r !== id);
+    saveHiddenRecipes();
+    renderRecipeCards();
+}
+
+function editBuiltInRecipe(recipe) {
+    // Create a custom copy of the built-in recipe
+    const customCopy = {
+        id: 'custom-' + Date.now(),
+        name: recipe.name,
+        category: recipe.category,
+        image: recipe.image || getCategoryEmoji(recipe.category),
+        description: recipe.description || '',
+        prepTime: recipe.prepTime || 'N/A',
+        totalTime: recipe.totalTime || 'N/A',
+        isCustom: true,
+        ingredients: recipe.ingredients || [],
+        steps: recipe.steps || [],
+        vacuumTips: recipe.vacuumTips || '',
+        originalId: recipe.id, // Track which recipe this was cloned from
+        createdAt: new Date().toISOString()
+    };
+
+    AppState.customRecipes.push(customCopy);
+    saveCustomRecipes();
+
+    // Hide the original
+    hideBuiltInRecipe(recipe.id);
+
+    // Open the form to edit
+    openRecipeForm(customCopy.id);
+}
+
+function openHideModal(recipeId, recipeName) {
+    const modal = document.getElementById('deleteConfirmModal');
+    const nameSpan = document.getElementById('deleteRecipeName');
+    const title = modal.querySelector('.modal-title');
+
+    AppState.hidingRecipeId = recipeId;
+    AppState.deletingRecipeId = null;
+    nameSpan.textContent = recipeName;
+    title.textContent = 'Hide Recipe?';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
 function getCategoryEmoji(category) {
     const emojis = {
         beef: '🥩', chicken: '🍗', lamb: '🍖', pork: '🥓',
@@ -870,7 +956,12 @@ function setupRecipeForm() {
     });
 
     confirmDelete?.addEventListener('click', () => {
-        if (AppState.deletingRecipeId) {
+        if (AppState.hidingRecipeId) {
+            // Hide built-in recipe
+            hideBuiltInRecipe(AppState.hidingRecipeId);
+            closeDeleteModal();
+        } else if (AppState.deletingRecipeId) {
+            // Delete custom recipe
             deleteCustomRecipe(AppState.deletingRecipeId);
             closeDeleteModal();
         }
@@ -918,9 +1009,12 @@ function closeRecipeForm() {
 function openDeleteModal(recipeId, recipeName) {
     const modal = document.getElementById('deleteConfirmModal');
     const nameSpan = document.getElementById('deleteRecipeName');
+    const title = modal.querySelector('.modal-title');
 
     AppState.deletingRecipeId = recipeId;
+    AppState.hidingRecipeId = null;
     nameSpan.textContent = recipeName;
+    title.textContent = 'Delete Recipe?';
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -930,6 +1024,7 @@ function closeDeleteModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
     AppState.deletingRecipeId = null;
+    AppState.hidingRecipeId = null;
 }
 
 // ==========================================
